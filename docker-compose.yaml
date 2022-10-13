@@ -1,0 +1,33 @@
+version: "3.3"
+
+# https://github.com/dusty-nv/jetson-inference/blob/master/docker/run.sh
+
+
+services:
+
+  autobot_core:
+    build:
+      context: .
+      dockerfile: tf.Dockerfile
+    container_name: autobot_core
+    image: autobot_core
+    restart: "always"
+    network_mode: host
+    privileged: true
+    tty: true
+    stdin_open: true
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      # X11 & Cam
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /tmp/camsock:/tmp/camsock:rw
+      - /tmp/argus_socket:/tmp/argus_socket:rw
+      - /tmp/nvscsock:/tmp/nvscsock:rw
+      #- /etc/enctune.conf:/etc/enctune.conf
+      #----------
+      - ./:/AutoBot
+      - /opt:/opt
+      - /dev:/dev                           # [обязательно] - для проброса USB камеры
+    working_dir: /AutoBot
+    entrypoint: 'bash'
