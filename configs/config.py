@@ -38,7 +38,7 @@ CAMERA_VFLIP = False
 CAMERA_HFLIP = False
 CAMERA_INDEX = 0  # used for 'WEBCAM' and 'CVCAM' when there is more than one camera connected 
 # For CSIC camera - If the camera is mounted in a rotated position, changing the below parameter will correct the output frame orientation
-CSIC_CAM_GSTREAMER_FLIP_PARM = 0 # (0 => none , 4 => Flip horizontally, 6 => Flip vertically)
+CSIC_CAM_GSTREAMER_FLIP_PARM = 2 # (0 => none , 4 => Flip horizontally, 6 => Flip vertically)
 
 # For IMAGE_LIST camera
 # PATH_MASK = "~/mycar/data/tub_1_20-03-12/*.jpg"
@@ -424,7 +424,7 @@ FREEZE_LAYERS = False               #default False will allow all layers to be m
 NUM_LAST_LAYERS_TO_TRAIN = 7        #when freezing layers, how many layers from the last should be allowed to train?
 
 #WEB CONTROL
-WEB_CONTROL_PORT = int(os.getenv("WEB_CONTROL_PORT", 8887))  # which port to listen on when making a web controller
+WEB_CONTROL_PORT = int(os.getenv("WEB_CONTROL_PORT", 9001))  # which port to listen on when making a web controller
 WEB_INIT_MODE = "user"              # which control mode to start in. one of user|local_angle|local. Setting local will start in ai mode.
 
 #JOYSTICK

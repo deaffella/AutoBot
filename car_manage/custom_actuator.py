@@ -247,5 +247,5 @@ class AutoBot_Actuator(object):
 		self.serial_port.set_device_value(device_name='WHEELS',
 										  value={'left': left_wheel, 'right': right_wheel})
 
-		logger.warn(f'\tl: {self.left_throttle}\t\tr: {self.right_throttle}\t||\t[{left_wheel}]-[{right_wheel}]')
+		# logger.warn(f'\tl: {self.left_throttle}\t\tr: {self.right_throttle}\t||\t[{left_wheel}]-[{right_wheel}]')
 

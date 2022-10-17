@@ -73,6 +73,7 @@ RUN git checkout main
 RUN pip3 install -e .[nano]
 
 
+COPY ./ /AutoBot/
 
 WORKDIR /AutoBot/
 CMD [ "bash" ]

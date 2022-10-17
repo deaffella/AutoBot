@@ -18,6 +18,8 @@ services:
     stdin_open: true
     environment:
       - DISPLAY=$DISPLAY
+#    ports:
+#    - 9002:8887
     volumes:
       # X11 & Cam
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -30,4 +32,5 @@ services:
       - /opt:/opt
       - /dev:/dev                           # [обязательно] - для проброса USB камеры
     working_dir: /AutoBot
-    entrypoint: 'bash'
+    #entrypoint: 'bash'
+    entrypoint: './drive.py'

@@ -1016,7 +1016,7 @@ def add_drivetrain(V, cfg):
 
 
         elif cfg.DRIVE_TRAIN_TYPE == "AUTOBOT":
-            from custom_actuator import AutoBot_Actuator
+            from car_manage.custom_actuator import AutoBot_Actuator
 
             autobot_motor = AutoBot_Actuator()
             V.add(autobot_motor, inputs=['left/throttle', 'right/throttle'])
@@ -1027,7 +1027,8 @@ def add_drivetrain(V, cfg):
 
 if __name__ == '__main__':
     args = docopt(__doc__)
-    cfg = dk.load_config(myconfig=args['--myconfig'])
+    # cfg = dk.load_config(myconfig=args['--myconfig'])
+    cfg = dk.load_config(myconfig='../configs/myconfig.py', config_path='../configs/config.py')
 
     if args['drive']:
         model_type = args['--type']
