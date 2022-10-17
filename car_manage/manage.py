@@ -626,8 +626,8 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
             # `donkey createjs` command
             #
             if cfg.CONTROLLER_TYPE == "custom":  # custom controller created with `donkey createjs` command
-                from my_joystick import MyJoystickController
-                ctr = MyJoystickController(
+                from car_manage.joystics.ds4_blue import DS4_BlueController
+                ctr = DS4_BlueController(
                     throttle_dir=cfg.JOYSTICK_THROTTLE_DIR,
                     throttle_scale=cfg.JOYSTICK_MAX_THROTTLE,
                     steering_scale=cfg.JOYSTICK_STEERING_SCALE,

@@ -18,15 +18,13 @@ services:
     stdin_open: true
     environment:
       - DISPLAY=$DISPLAY
-#    ports:
-#    - 9002:8887
     volumes:
       # X11 & Cam
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /tmp/camsock:/tmp/camsock:rw
       - /tmp/argus_socket:/tmp/argus_socket:rw
       - /tmp/nvscsock:/tmp/nvscsock:rw
-      #- /etc/enctune.conf:/etc/enctune.conf
+      - /etc/enctune.conf:/etc/enctune.conf
       #----------
       - ./:/AutoBot
       - /opt:/opt
