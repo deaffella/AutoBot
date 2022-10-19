@@ -373,6 +373,7 @@ DEFAULT_AI_FRAMEWORK = 'tensorflow'
 # pytorch models: (resnet18)
 DEFAULT_MODEL_TYPE = 'linear'
 BATCH_SIZE = 128                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
+# BATCH_SIZE = 256                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
 TRAIN_TEST_SPLIT = 0.8          #what percent of records to use for training. the remaining used for validation.
 MAX_EPOCHS = 100                #how many times to visit all records of your data
 SHOW_PLOT = True                #would you like to see a pop up display of final loss?

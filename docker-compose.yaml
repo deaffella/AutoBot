@@ -31,4 +31,4 @@ services:
       - /dev:/dev                           # [обязательно] - для проброса USB камеры
     working_dir: /AutoBot
     entrypoint: 'bash'
-#    entrypoint: './drive.py'
+    #entrypoint: './drive.py'
