@@ -5,12 +5,27 @@ version: "3.3"
 
 services:
 
-  autobot_core:
+  l4t:
     build:
       context: .
-      dockerfile: tf.Dockerfile
-    container_name: autobot_core
-    image: autobot_core
+      dockerfile: dockerfiles/l4t_cv_tf.Dockerfile
+    container_name: l4t
+    image: autobot:l4t_cv_tf
+#    network_mode: host
+#    privileged: true
+    tty: true
+    stdin_open: true
+    entrypoint: 'bash'
+
+
+  donkeycar:
+    depends_on:
+      - l4t
+    build:
+      context: .
+      dockerfile: dockerfiles/donkey_car.Dockerfile
+    container_name: donkey_car
+    image: autobot:donkey_car
     restart: "always"
     network_mode: host
     privileged: true
@@ -25,10 +40,10 @@ services:
       - /tmp/argus_socket:/tmp/argus_socket:rw
       - /tmp/nvscsock:/tmp/nvscsock:rw
       - /etc/enctune.conf:/etc/enctune.conf
+      #- /opt:/opt
       #----------
-      - ./:/AutoBot
-      - /opt:/opt
+      - ./donkey_car:/donkey_car
       - /dev:/dev                           # [обязательно] - для проброса USB камеры
-    working_dir: /AutoBot
+    working_dir: /donkey_car
     entrypoint: 'bash'
     #entrypoint: './drive.py'

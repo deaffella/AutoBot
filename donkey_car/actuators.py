@@ -209,7 +209,6 @@ class AutoBot_Actuator(object):
 		self.serial_port = None
 		self.connect_to_serial()
 
-
 		self.running = True
 
 		self.zero_throttle = zero_throttle
@@ -217,6 +216,12 @@ class AutoBot_Actuator(object):
 
 		self.left_throttle = 0
 		self.right_throttle = 0
+
+		self.serial_port.set_device_value(device_name='FLASHLIGHT', value=100)	# turn on flashlight
+
+		# self.serial_port.set_device_value(device_name='CAMERA_SERVO', value=50) # set camera servo to initial pose
+		# self.serial_port.set_device_value(device_name='CAMERA_SERVO', value=70) # set camera servo to initial pose
+		self.serial_port.set_device_value(device_name='CAMERA_SERVO', value=80) # set camera servo to initial pose
 
 
 	def connect_to_serial(self):
@@ -244,8 +249,14 @@ class AutoBot_Actuator(object):
 
 		left_wheel = int(self.left_throttle * 100)
 		right_wheel = int(self.right_throttle * 100)
-		self.serial_port.set_device_value(device_name='WHEELS',
-										  value={'left': left_wheel, 'right': right_wheel})
 
-		# logger.warn(f'\tl: {self.left_throttle}\t\tr: {self.right_throttle}\t||\t[{left_wheel}]-[{right_wheel}]')
+		self.serial_port.set_device_value(device_name='WHEELS', value={'left': left_wheel, 'right': right_wheel})
+
+	def shutdown(self):
+		self.serial_port.set_device_value(device_name='WHEELS', value={'left': 0, 'right': 0})
+		time.sleep(0.1)
+		self.serial_port.set_device_value(device_name='FLASHLIGHT', value=0)	# turn off flashlight
+		time.sleep(0.1)
+		self.serial_port.set_device_value(device_name='CAMERA_SERVO', value=50)
+
 

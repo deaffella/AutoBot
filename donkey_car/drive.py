@@ -3,9 +3,11 @@
 import os
 import sys
 import time
-import donkeycar as dk
 
-from car_manage.manage import drive
+import logging
+
+import donkeycar as dk
+from manage import drive
 
 
 
@@ -14,9 +16,13 @@ from car_manage.manage import drive
 
 
 if __name__ == '__main__':
-	cfg = dk.load_config(myconfig='myconfig.py', config_path='./configs/config.py')
+	logger = logging.getLogger(__name__)
+	logging.basicConfig(level=logging.INFO)
 
-	use_gamepad = cfg.USE_GAMEPAD
+	cfg = dk.load_config(config_path='./config.py')
+
+
+	use_gamepad = cfg.USE_JOYSTICK_AS_DEFAULT
 	model = cfg.MODEL
 	model_type = cfg.MODEL_TYPE
 
@@ -27,7 +33,6 @@ if __name__ == '__main__':
 			time.sleep(1)
 		sys.exit()
 	else:
-
 		drive(cfg,
 			  use_joystick=use_gamepad,
 			  model_path=model,

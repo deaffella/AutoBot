@@ -47,6 +47,11 @@ sleep 1
 
 cd ${project_dir_path}
 
+
+### Собираем базовый образ
+#docker build -t autobot:l4t_cv_tf --file dockerfiles/l4t_cv_tf.Dockerfile .
+
+
 # Поднимаем контейнеры из docker-compose.yml
 #docker-compose -p "${docker_stack_name}" up -d --build
 

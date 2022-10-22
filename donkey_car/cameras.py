@@ -1,4 +1,11 @@
+import os
+import serial
+import sys
+import time
 
+from typing import List, Tuple, Any, Dict
+
+import logging
 
 import time
 import cv2
@@ -7,37 +14,30 @@ import numpy as np
 import random
 
 
-import donkeycar as dk
-
-
-
-
-
-
 class Jetson_CSI_Camera(object):
     def __init__(self,
                  sensor_id: int = 0,
                  capture_width: int = 1280,
                  capture_height: int = 720,
                  framerate: int = 60,
-                 flip_method: int = 0,
-                 display_width: int = None,
-                 display_height: int = None,
-                 ):
+                 gstreamer_flip: int = 0,
+                 image_w: int = None,
+                 image_h: int = None,
+                 image_d: int = 3):
         self.sensor_id = sensor_id
         self.capture_width = capture_width
         self.capture_height = capture_height
         self.framerate = framerate
-        self.flip_method = flip_method
+        self.gstreamer_flip = gstreamer_flip
 
-        if display_width is None:
+        if image_w is None:
             self.display_width = capture_width
         else:
-            self.display_width = display_width
-        if display_height is None:
+            self.display_width = image_w
+        if image_h is None:
             self.display_height = capture_height
         else:
-            self.display_height = display_height
+            self.display_height = image_h
 
         # The last captured image from the camera
         self.frame = None
@@ -74,12 +74,20 @@ class Jetson_CSI_Camera(object):
     :param flip_method:
     :return:
         """
+        # return f"nvarguscamerasrc sensor-id={sensor_id} ! " \
+        #        f"video/x-raw(memory:NVMM), width=(int){capture_width}, height=(int){capture_height}, framerate=(fraction){framerate}/1 ! " \
+        #        f"nvvidconv flip-method={flip_method} ! " \
+        #        f"video/x-raw, width=(int){display_width}, height=(int){display_height}, format=(string)BGRx ! " \
+        #        f"videoconvert ! " \
+        #        f"video/x-raw, format=(string)BGR ! appsink"
         return f"nvarguscamerasrc sensor-id={sensor_id} ! " \
-               f"video/x-raw(memory:NVMM), width=(int){capture_width}, height=(int){capture_height}, framerate=(fraction){framerate}/1 ! " \
+               f"video/x-raw(memory:NVMM), width=(int){capture_width}, height=(int){capture_height}, " \
+               f"format=(string)NV12, " \
+               f"framerate=(fraction){framerate}/1 ! " \
                f"nvvidconv flip-method={flip_method} ! " \
+               f"nvvidconv ! " \
                f"video/x-raw, width=(int){display_width}, height=(int){display_height}, format=(string)BGRx ! " \
-               f"videoconvert ! " \
-               f"video/x-raw, format=(string)BGR ! appsink"
+               f"videoconvert ! appsink"
 
     def __create_capture_device(self):
         try:
@@ -89,7 +97,7 @@ class Jetson_CSI_Camera(object):
                                                                           display_width=self.display_width,
                                                                           display_height=self.display_height,
                                                                           framerate=self.framerate,
-                                                                          flip_method=self.flip_method)
+                                                                          flip_method=self.gstreamer_flip)
 
             self.video_capture = cv2.VideoCapture(self.gstreamer_pipeline, cv2.CAP_GSTREAMER)
 
@@ -114,7 +122,9 @@ class Jetson_CSI_Camera(object):
         return self.frame
 
     def read_frame_from_device(self):
-        self.grabbed, self.frame = self.video_capture.read()
+        grabbed, frame = self.video_capture.read()
+        if frame is not None:
+            self.grabbed, self.frame = grabbed, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     def update(self):
         if self.video_capture is None:
@@ -141,6 +151,7 @@ class Cv_Image_Display(object):
 
 
 if __name__=='__main__':
+    import donkeycar as dk
 
     robot = dk.Vehicle()
 
@@ -152,6 +163,5 @@ if __name__=='__main__':
 
     display = Cv_Image_Display()
     robot.add(display, inputs=['camera/main_cam'])
-
 
     robot.start(rate_hz=20)

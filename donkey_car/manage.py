@@ -626,7 +626,9 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
             # `donkey createjs` command
             #
             if cfg.CONTROLLER_TYPE == "custom":  # custom controller created with `donkey createjs` command
-                from car_manage.joystics.ds4_blue import DS4_BlueController
+                # from donkey_car.joystics.ds4_blue import DS4_BlueController
+
+                from joystics.ds4_blue import DS4_BlueController
                 ctr = DS4_BlueController(
                     throttle_dir=cfg.JOYSTICK_THROTTLE_DIR,
                     throttle_scale=cfg.JOYSTICK_MAX_THROTTLE,
@@ -662,7 +664,7 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
 
 def add_simulator(V, cfg):
     # Donkey gym part will output position information if it is configured
-    # TODO: the simulation outputs conflict with imu, odometry, kinematics pose estimation and T265 outputs; make them work together.
+    # TO-DO: the simulation outputs conflict with imu, odometry, kinematics pose estimation and T265 outputs; make them work together.
     if cfg.DONKEY_GYM:
         from donkeycar.parts.dgym import DonkeyGymEnv
         # rbx
@@ -708,11 +710,21 @@ def get_camera(cfg):
         elif cfg.CAMERA_TYPE == "CVCAM":
             from donkeycar.parts.cv import CvCam
             cam = CvCam(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH)
+
         elif cfg.CAMERA_TYPE == "CSIC":
-            from donkeycar.parts.camera import CSICamera
-            cam = CSICamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
-                            capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
-                            framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
+            # from donkeycar.parts.camera import CSICamera
+            # cam = CSICamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
+            #                 capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
+            #                 framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
+
+            # from donkey_car.cameras import Jetson_CSI_Camera
+            from cameras import Jetson_CSI_Camera
+            cam = Jetson_CSI_Camera(sensor_id=cfg.CAMERA_SENSOR_ID,
+                                    image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
+                                    capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
+                                    framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
+
+
         elif cfg.CAMERA_TYPE == "V4L":
             from donkeycar.parts.camera import V4LCamera
             cam = V4LCamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH, framerate=cfg.CAMERA_FRAMERATE)
@@ -1016,7 +1028,7 @@ def add_drivetrain(V, cfg):
 
 
         elif cfg.DRIVE_TRAIN_TYPE == "AUTOBOT":
-            from car_manage.custom_actuator import AutoBot_Actuator
+            from actuators import AutoBot_Actuator
 
             autobot_motor = AutoBot_Actuator()
             V.add(autobot_motor, inputs=['left/throttle', 'right/throttle'])

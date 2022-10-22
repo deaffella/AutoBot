@@ -8,23 +8,6 @@
 # The update operation will not touch this file.
 # """
 
-
-# USE_GAMEPAD = True
-USE_GAMEPAD = False
-
-# MODEL = None
-# MODEL_TYPE = None
-
-MODEL_TYPE, MODEL = 'tflite_linear', './trained_models/pilot_22-10-19_0.tflite'
-# MODEL_TYPE, MODEL = 'tflite_linear', './trained_models/pilot_22-10-19_0.tflite'
-
-
-
-# MODEL_TYPE, MODEL = 'linear', './trained_models/pilot_22-10-19_0.h5'
-# MODEL_TYPE, MODEL = 'linear', '../trained_models/'
-
-
-
 # import os
 # 
 # #PATHS
