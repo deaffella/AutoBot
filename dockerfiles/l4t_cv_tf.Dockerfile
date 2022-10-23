@@ -79,7 +79,7 @@ RUN pip3 install cython pyserial
 ## CuPy
 ##
 #ARG CUPY_VERSION=v9.2.0
-#ARG CUPY_NVCC_GENERATE_CODE="arch=compute_53,code=sm_53;arch=compute_62,code=sm_62;arch=compute_72,code=sm_72"
+#ARG CUPY_NVCC_GENERATE_nano CODE="arch=compute_53,code=sm_53;arch=compute_62,code=sm_62;arch=compute_72,code=sm_72"
 #
 #RUN git clone -b ${CUPY_VERSION} --recursive https://github.com/cupy/cupy cupy && \
 #    cd cupy && \
@@ -87,6 +87,28 @@ RUN pip3 install cython pyserial
 #    python3 setup.py install --verbose && \
 #    cd ../ && \
 #    rm -rf cupy
+
+
+RUN apt update
+RUN apt install -y v4l2loopback-utils ffmpeg
+RUN pip3 install pyzmq imagezmq
+RUN pip3 install pyfakewebcam
+
+RUN apt install -y gcc cmake
+
+WORKDIR /
+RUN mkdir temp_dir
+
+# SIMPLEJPEG
+WORKDIR /temp_dir
+RUN git clone https://gitlab.com/jfolz/simplejpeg
+WORKDIR /temp_dir/simplejpeg/
+RUN python3 setup.py bdist_wheel
+RUN python3 setup.py install
+
+
+
+
 
 WORKDIR /
 CMD [ "bash" ]

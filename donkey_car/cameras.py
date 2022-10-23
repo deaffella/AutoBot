@@ -20,7 +20,7 @@ class Jetson_CSI_Camera(object):
                  capture_width: int = 1280,
                  capture_height: int = 720,
                  framerate: int = 60,
-                 gstreamer_flip: int = 0,
+                 gstreamer_flip: int = 2,
                  image_w: int = None,
                  image_h: int = None,
                  image_d: int = 3):
@@ -125,6 +125,7 @@ class Jetson_CSI_Camera(object):
         grabbed, frame = self.video_capture.read()
         if frame is not None:
             self.grabbed, self.frame = grabbed, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            return self.grabbed, self.frame
 
     def update(self):
         if self.video_capture is None:

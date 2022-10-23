@@ -10,15 +10,6 @@ MAINTAINER Letenkov Maksim <letenkovmaksim@yandex.ru>
 
 SHELL ["/bin/bash", "-c"]
 
-RUN apt update
-RUN apt install -y v4l2loopback-utils ffmpeg
-
-
-
-
-RUN pip3 install pyzmq imagezmq
-RUN pip3 install pyfakewebcam
-
 
 
 # install donkeycar

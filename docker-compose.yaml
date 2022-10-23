@@ -46,6 +46,33 @@ services:
       - ./donkey_car:/donkey_car
       - /dev:/dev                           # [обязательно] - для проброса USB камеры
     working_dir: /donkey_car
-#    entrypoint: 'bash'
+    #entrypoint: 'bash'
     #entrypoint: './drive.py'
     entrypoint: 'jupyter-lab --allow-root --ip 0.0.0.0 --port 9002'
+
+
+#  camera_streamer:
+#    # ustreamer для rpi камеры  | Цепляет чистый поток с   /dev/video1
+#    depends_on:
+#      - l4t
+#    build:
+#      context: .
+#      dockerfile: dockerfiles/camera_streamer.Dockerfile
+#    container_name: camera_streamer
+#    image: camera_streamer
+#    restart: "always"
+#    ports:
+#      - 2021:80
+#    privileged: true
+#    tty: true
+#    stdin_open: true
+#    environment:
+#      - DISPLAY=$DISPLAY
+#    volumes:
+#      #- ./camera_streamer/images:/camera_streamer/images
+#      - /dev:/dev                           # [обязательно]
+#    working_dir: /temp_dir/ustreamer
+##    #entrypoint: './ustreamer --host 0.0.0.0 --port 80 --drop-same-frames=30 --quality=80  --buffers=2 --encoder M2M-IMAGE -m YUYV -r 1280x720 --desired-fps 60 -l --blank ../images/no-signal-rpi.jpg'    # 1280x720@60
+###    entrypoint: './ustreamer --host 0.0.0.0 --port 80 --drop-same-frames=30 --quality=80  --buffers=2 --encoder M2M-IMAGE -m YUYV -r 640x480 --desired-fps 90 -l --blank ../images/no-signal-rpi.jpg'      # 640x480@90
+##    entrypoint: './ustreamer --host 0.0.0.0 --port 80 --drop-same-frames=30 --quality=80  --buffers=2 --encoder M2M-IMAGE -m YUYV -r 640x480 --desired-fps 90 -l'      # 640x480@90
+#    entrypoint: 'bash'

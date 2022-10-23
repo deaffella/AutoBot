@@ -55,9 +55,11 @@ cd ${project_dir_path}
 # Поднимаем контейнеры из docker-compose.yml
 #docker-compose -p "${docker_stack_name}" up -d --build
 
-##DOCKER_DEFAULT_PLATFORM=${OS_PLATFORM} \
-#COMPOSE_DOCKER_CLI_BUILD=1 \
-#DOCKER_BUILDKIT=1 \
+docker-compose -p "${docker_stack_name}" down
+
+#DOCKER_DEFAULT_PLATFORM=${OS_PLATFORM} \
+COMPOSE_DOCKER_CLI_BUILD=1 \
+DOCKER_BUILDKIT=1 \
 HOSTNAME=${HOSTNAME} \
 DISPLAY=${DISPLAY} \
 docker-compose -p "${docker_stack_name}" up -d --build

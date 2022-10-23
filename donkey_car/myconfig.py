@@ -37,9 +37,9 @@ DEFAULT_META = []
 
 
 # # USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = False, None, None
-# USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = True, None, None
+USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = True, None, None
 
 # tensorflow models: (linear|categorical|tflite_linear|tensorrt_linear)
 # USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = True, 'tflite_linear', './models/pilot_22-10-20_0.tflite'
-USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = False, 'tflite_linear', './models/pilot_22-10-20_0.tflite'
+# USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = False, 'tflite_linear', './models/pilot_22-10-20_0.tflite'
 

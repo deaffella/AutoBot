@@ -570,9 +570,9 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
 
 
     if cfg.DONKEY_GYM:
-        print("You can now go to http://localhost:%d to drive your car." % cfg.WEB_CONTROL_PORT)
+        print("You can now go to:\n\nhttp://localhost:%d\nto drive your car." % cfg.WEB_CONTROL_PORT)
     else:
-        print("You can now go to <your hostname.local>:%d to drive your car." % cfg.WEB_CONTROL_PORT)
+        print("You can now go to:\n\n<your hostname.local>:%d\nto drive your car." % cfg.WEB_CONTROL_PORT)
     if has_input_controller:
         print("You can now move your controller to drive your car.")
         if isinstance(ctr, JoystickController):
