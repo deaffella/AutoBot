@@ -24,7 +24,8 @@ if __name__ == '__main__':
 
 	use_gamepad = cfg.USE_JOYSTICK_AS_DEFAULT
 	model = cfg.MODEL
-	model_type = cfg.MODEL_TYPE
+	model_type = cfg.DEFAULT_MODEL_TYPE
+	meta = cfg.DEFAULT_META
 
 	if not os.path.exists(cfg.JOYSTICK_DEVICE_FILE) and use_gamepad:
 		print(f'\nGamepad not connected and does not exist at: `{cfg.JOYSTICK_DEVICE_FILE}`.\nRobot will sleep for 5s.')
@@ -38,4 +39,4 @@ if __name__ == '__main__':
 			  model_path=model,
 			  model_type=model_type,
 			  camera_type='single',
-			  meta=[])
+			  meta=meta)

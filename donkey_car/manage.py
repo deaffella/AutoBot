@@ -272,7 +272,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
 
     def load_model(kl, model_path):
         start = time.time()
-        print('loading model', model_path)
+        print(f'\nloading model:{model_path}\n')
         kl.load(model_path)
         print('finished loading in %s sec.' % (str(time.time() - start)) )
 
@@ -305,7 +305,6 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     if model_path:
         # If we have a model, create an appropriate Keras part
         kl = dk.utils.get_model_by_type(model_type, cfg)
-
         #
         # get callback function to reload the model
         # for the configured model format
@@ -1040,7 +1039,8 @@ def add_drivetrain(V, cfg):
 if __name__ == '__main__':
     args = docopt(__doc__)
     # cfg = dk.load_config(myconfig=args['--myconfig'])
-    cfg = dk.load_config(myconfig='../configs/myconfig.py', config_path='../configs/config.py')
+    # cfg = dk.load_config(myconfig='../configs/myconfig.py', config_path='../configs/config.py')
+    cfg = dk.load_config(myconfig='./myconfig.py', config_path='./config.py')
 
     if args['drive']:
         model_type = args['--type']

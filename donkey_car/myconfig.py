@@ -33,12 +33,13 @@ DRIVE_TRAIN_TYPE = "AUTOBOT"
 CONTROLLER_TYPE = 'custom'            #(ps3|ps4|xbox|pigpio_rc|nimbus|wiiu|F710|rc3|MM1|custom) custom will run the my_joystick.py controller written by the `donkey createjs` command
 JOYSTICK_MAX_THROTTLE = 1
 
-# # USE_JOYSTICK_AS_DEFAULT, MODEL_TYPE, MODEL = False, None, None
-# USE_JOYSTICK_AS_DEFAULT, MODEL_TYPE, MODEL = True, None, None
+DEFAULT_META = []
+
+
+# # USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = False, None, None
+# USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = True, None, None
 
 # tensorflow models: (linear|categorical|tflite_linear|tensorrt_linear)
-USE_JOYSTICK_AS_DEFAULT, MODEL_TYPE, MODEL = False, 'tflite_linear', './models/pilot_22-10-20_0.tflite'
-# USE_JOYSTICK_AS_DEFAULT, MODEL_TYPE, MODEL = False, 'tflite_inferred', './models/pilot_22-10-20_1.tflite'
+# USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = True, 'tflite_linear', './models/pilot_22-10-20_0.tflite'
+USE_JOYSTICK_AS_DEFAULT, DEFAULT_MODEL_TYPE, MODEL = False, 'tflite_linear', './models/pilot_22-10-20_0.tflite'
 
-
-# MODEL_TYPE, MODEL = True, 'tflite_linear', './trained_models/pilot_22-10-19_0.tflite'
