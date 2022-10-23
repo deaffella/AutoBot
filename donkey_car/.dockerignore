@@ -1,0 +1,6 @@
+*/models/*
+*/data/*
+*/logs/*
+*/ipynb_checkpoints/*
+*/__pycache__/*
+.git
