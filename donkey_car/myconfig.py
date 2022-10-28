@@ -11,6 +11,9 @@
 import os
 
 
+AUTO_CREATE_NEW_TUB = False
+# AUTO_CREATE_NEW_TUB = True
+
 ### PATHS --------------------------------------------------------------------------------------------------------------
 # AutoBot/donkey_car/
 # DONKEY_CAR_DIR_PATH = CAR_PATH = PACKAGE_PATH = os.path.dirname(os.path.realpath(__file__ + '/../'))
@@ -18,6 +21,9 @@ DONKEY_CAR_DIR_PATH = CAR_PATH = PACKAGE_PATH = os.path.dirname(os.path.realpath
 DYNAMIC_DATA_DIR_PATH = os.path.join(CAR_PATH, 'DYNAMIC_DATA')
 DATA_PATH = os.path.join(DYNAMIC_DATA_DIR_PATH, 'data')
 MODELS_PATH = os.path.join(DYNAMIC_DATA_DIR_PATH, 'models')
+
+
+DRIVE_LOOP_HZ = 20
 
 
 ### CAMERAS ------------------------------------------------------------------------------------------------------------
@@ -46,6 +52,8 @@ USE_JOYSTICK_AS_DEFAULT = False
 SHOW_FPS = True
 FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency info into the shell
 
+HAVE_PERFMON=False
+# HAVE_PERFMON=True
 
 ### AUTOPILOT MODELS ---------------------------------------------------------------------------------------------------
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)

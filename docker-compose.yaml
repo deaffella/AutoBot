@@ -11,12 +11,18 @@ services:
       dockerfile: dockerfiles/l4t_cv_tf.Dockerfile
     container_name: l4t
     image: autobot:l4t_cv_tf
-#    network_mode: host
-#    privileged: true
+    #network_mode: host
+    #privileged: true
     tty: true
     stdin_open: true
+    ports:
+      - 9001:9001
     #entrypoint: 'bash'
-    command: 'pwd'
+    #command: 'pwd'
+    volumes:
+      - ./donkey_car:/donkey_car
+    working_dir: /donkey_car
+    entrypoint: 'jupyter-lab --allow-root --ip 0.0.0.0 --port 9001'
 
 
   donkeycar:
@@ -47,9 +53,8 @@ services:
       - ./donkey_car:/donkey_car
       - /dev:/dev                           # [обязательно] - для проброса USB камеры
     working_dir: /donkey_car
-    #entrypoint: 'bash'
+    entrypoint: 'bash'
     #entrypoint: './drive.py'
-    entrypoint: 'jupyter-lab --allow-root --ip 0.0.0.0 --port 9001'
 
 
 #  camera_streamer:

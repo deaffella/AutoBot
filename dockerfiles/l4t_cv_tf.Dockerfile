@@ -107,7 +107,18 @@ RUN python3 setup.py bdist_wheel
 RUN python3 setup.py install
 
 
+RUN apt install -y libssl1.0-dev
+RUN apt install -y nodejs nodejs-dev
+RUN apt install -y node-gyp
+RUN apt install -y npm
+RUN pip3 install jupyter jupyterlab
 
+#RUN npm cache clean -f
+#RUN npm install -g n
+#RUN n latest
+#RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+
+RUN jupyter lab --generate-config
 
 
 WORKDIR /
