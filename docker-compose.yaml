@@ -34,6 +34,7 @@ services:
     stdin_open: true
     environment:
       - DISPLAY=$DISPLAY
+      - WEB_CONTROL_PORT=9002
     volumes:
       # X11 & Cam
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -48,7 +49,7 @@ services:
     working_dir: /donkey_car
     #entrypoint: 'bash'
     #entrypoint: './drive.py'
-    entrypoint: 'jupyter-lab --allow-root --ip 0.0.0.0 --port 9002'
+    entrypoint: 'jupyter-lab --allow-root --ip 0.0.0.0 --port 9001'
 
 
 #  camera_streamer:

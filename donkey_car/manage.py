@@ -16,7 +16,6 @@ Options:
 """
 from docopt import docopt
 
-#
 # import cv2 early to avoid issue with importing after tensorflow
 # see https://github.com/opencv/opencv/issues/14884#issuecomment-599852128
 #
@@ -711,13 +710,15 @@ def get_camera(cfg):
             cam = CvCam(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH)
 
         elif cfg.CAMERA_TYPE == "CSIC":
-            # from donkeycar.parts.camera import CSICamera
-            # cam = CSICamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
-            #                 capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
-            #                 framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
+            from donkeycar.parts.camera import CSICamera
+            cam = CSICamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
+                            capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
+                            framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
 
-            # from donkey_car.cameras import Jetson_CSI_Camera
-            from cameras import Jetson_CSI_Camera
+
+        elif cfg.CAMERA_TYPE == "JETSON_CSIC":
+            # fix for jetson Nano B01 to use correct CSI camera
+            from parts.cameras import Jetson_CSI_Camera
             cam = Jetson_CSI_Camera(sensor_id=cfg.CAMERA_SENSOR_ID,
                                     image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
                                     capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
@@ -814,7 +815,6 @@ def add_odometry(V, cfg):
             print("No supported encoder found")
 
 
-#
 # Drive train setup
 #
 def add_drivetrain(V, cfg):
@@ -1027,7 +1027,7 @@ def add_drivetrain(V, cfg):
 
 
         elif cfg.DRIVE_TRAIN_TYPE == "AUTOBOT":
-            from actuators import AutoBot_Actuator
+            from parts.actuators import AutoBot_Actuator
 
             autobot_motor = AutoBot_Actuator()
             V.add(autobot_motor, inputs=['left/throttle', 'right/throttle'])
@@ -1038,15 +1038,16 @@ def add_drivetrain(V, cfg):
 
 if __name__ == '__main__':
     args = docopt(__doc__)
-    # cfg = dk.load_config(myconfig=args['--myconfig'])
-    # cfg = dk.load_config(myconfig='../configs/myconfig.py', config_path='../configs/config.py')
-    cfg = dk.load_config(myconfig='./myconfig.py', config_path='./config.py')
+    cfg = dk.load_config(myconfig=args['--myconfig'])
 
     if args['drive']:
         model_type = args['--type']
         camera_type = args['--camera']
-        drive(cfg, model_path=args['--model'], use_joystick=args['--js'],
-              model_type=model_type, camera_type=camera_type,
+        drive(cfg,
+              model_path=args['--model'],
+              use_joystick=args['--js'],
+              model_type=model_type,
+              camera_type=camera_type,
               meta=args['--meta'])
     elif args['train']:
         print('Use python train.py instead.\n')

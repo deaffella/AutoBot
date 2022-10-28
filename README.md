@@ -1,5 +1,15 @@
 
 
+### WiFi powersave off
+___
+    
+    https://github.com/robwaat/Tutorial/blob/master/Jetson%20Disable%20Wifi%20Power%20Management.md
+    
+
+### Sync Files
+___
+
+
 Робот -> Комп
 
     rsync -rv --progress --partial nano@192.168.2.220:/home/nano/deaffy/AutoBot/donkey_car ~/projects/autobot/
