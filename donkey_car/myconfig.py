@@ -56,8 +56,8 @@ FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency 
 ### AUTOPILOT MODELS ---------------------------------------------------------------------------------------------------
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)
 # pytorch models: (resnet18)
-# DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
-DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-10-29_1.tflite'
+DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
+# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-10-29_1.tflite'
 
 
 ### TRAIN MODELS -------------------------------------------------------------------------------------------------------

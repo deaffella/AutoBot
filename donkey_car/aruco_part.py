@@ -23,8 +23,11 @@ from donkeycar.parts.actuator import TwoWheelSteeringThrottle
 
 #from manage import add_drivetrain
 from parts.cameras import Jetson_CSI_Camera
-from parts.actuators import AutoBot_Actuator
 from parts.web_controller.web import LocalWebController
+
+
+from parts.actuators import autobot_platform
+from parts.actuators import AutoBot_Actuator, AutoBot_Flashlight, AutoBot_UV_Flashlight, AutoBot_Camera_Servo
 
 
 
@@ -109,6 +112,13 @@ def dual_cam_drive(cfg,
 		ch.setFormatter(logging.Formatter(cfg.LOGGING_FORMAT))
 		logger.addHandler(ch)
 
+	autobot_actuator = AutoBot_Actuator()
+	V.add(autobot_actuator, inputs=['left/throttle', 'right/throttle'])
+
+	autobot_flashlight = AutoBot_Flashlight()
+	autobot_uv_flashlight = AutoBot_UV_Flashlight()
+	autobot_camera_servo = AutoBot_Camera_Servo()
+
 	# setup top camera
 	cam_top = Jetson_CSI_Camera(sensor_id=0,
 								image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
@@ -143,15 +153,16 @@ def dual_cam_drive(cfg,
 	# adding a button handler is just adding a part with a run_condition
 	# set to the button's name, so it runs when button is pressed.
 	#
-	# V.add(Lambda(lambda v: print(f"web/w1 clicked")), inputs=["web/w1"], run_condition="web/w1")
-	V.add(Lambda(lambda v: print(f"web/w1 clicked")), inputs=["web/w1"], run_condition="web/w1")
-
-
-	V.add(Lambda(lambda v: print(f"web/w2 clicked")), inputs=["web/w2"], run_condition="web/w2")
-	V.add(Lambda(lambda v: print(f"web/w3 clicked")), inputs=["web/w3"], run_condition="web/w3")
-	V.add(Lambda(lambda v: print(f"web/w4 clicked")), inputs=["web/w4"], run_condition="web/w4")
-	V.add(Lambda(lambda v: print(f"web/w5 clicked")), inputs=["web/w5"], run_condition="web/w5")
-	V.add(Lambda(lambda v: print(f"web/w6 clicked")), inputs=["web/w5"], run_condition="web/w6")
+	V.add(Lambda(lambda v: autobot_flashlight.run(0)), 		inputs=["web/w1"],	run_condition="web/w1")
+	V.add(Lambda(lambda v: autobot_flashlight.run(100)), 	inputs=["web/w2"],	run_condition="web/w2")
+	V.add(Lambda(lambda v: autobot_uv_flashlight.run(100)), inputs=["web/w3"],	run_condition="web/w3")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(30)), 	inputs=["web/w4"],	run_condition="web/w4")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(45)), 	inputs=["web/w5"],	run_condition="web/w5")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(60)), 	inputs=["web/w6"],	run_condition="web/w6")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(75)), 	inputs=["web/w7"],	run_condition="web/w7")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(90)), 	inputs=["web/w8"],	run_condition="web/w8")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(105)), 	inputs=["web/w9"],	run_condition="web/w9")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(120)), 	inputs=["web/w10"],	run_condition="web/w10")
 
 	# this throttle filter will allow one tap back for esc reverse
 	th_filter = ThrottleFilter()
@@ -402,13 +413,14 @@ def dual_cam_drive(cfg,
 	# Setup drivetrain
 	# add_drivetrain(V, cfg)
 
-
-
-
 	V.add(TwoWheelSteeringThrottle(), inputs=['throttle', 'angle'], outputs=['left/throttle', 'right/throttle'])
 
-	autobot_motor = AutoBot_Actuator()
-	V.add(autobot_motor, inputs=['left/throttle', 'right/throttle'])
+	# autobot_motor = AutoBot_Actuator()
+	# V.add(autobot_motor, inputs=['left/throttle', 'right/throttle'])
+
+	# autobot_flashlight = AutoBot_Flashlight()
+	# autobot_uv_flashlight = AutoBot_UV_Flashlight()
+	# autobot_camera_servo = AutoBot_Camera_Servo()
 
 
 	# add tub to save data
