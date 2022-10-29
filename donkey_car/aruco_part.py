@@ -19,8 +19,11 @@ from donkeycar.parts.launch import AiLaunch
 from donkeycar.parts.datastore import TubHandler
 from donkeycar.parts.tub_v2 import TubWriter
 
-from manage import add_drivetrain
+from donkeycar.parts.actuator import TwoWheelSteeringThrottle
+
+#from manage import add_drivetrain
 from parts.cameras import Jetson_CSI_Camera
+from parts.actuators import AutoBot_Actuator
 from parts.web_controller.web import LocalWebController
 
 
@@ -140,11 +143,15 @@ def dual_cam_drive(cfg,
 	# adding a button handler is just adding a part with a run_condition
 	# set to the button's name, so it runs when button is pressed.
 	#
+	# V.add(Lambda(lambda v: print(f"web/w1 clicked")), inputs=["web/w1"], run_condition="web/w1")
 	V.add(Lambda(lambda v: print(f"web/w1 clicked")), inputs=["web/w1"], run_condition="web/w1")
+
+
 	V.add(Lambda(lambda v: print(f"web/w2 clicked")), inputs=["web/w2"], run_condition="web/w2")
 	V.add(Lambda(lambda v: print(f"web/w3 clicked")), inputs=["web/w3"], run_condition="web/w3")
 	V.add(Lambda(lambda v: print(f"web/w4 clicked")), inputs=["web/w4"], run_condition="web/w4")
 	V.add(Lambda(lambda v: print(f"web/w5 clicked")), inputs=["web/w5"], run_condition="web/w5")
+	V.add(Lambda(lambda v: print(f"web/w6 clicked")), inputs=["web/w5"], run_condition="web/w6")
 
 	# this throttle filter will allow one tap back for esc reverse
 	th_filter = ThrottleFilter()
@@ -393,7 +400,15 @@ def dual_cam_drive(cfg,
 		V.add(AiRecordingCondition(), inputs=['user/mode', 'recording'], outputs=['recording'])
 
 	# Setup drivetrain
-	add_drivetrain(V, cfg)
+	# add_drivetrain(V, cfg)
+
+
+
+
+	V.add(TwoWheelSteeringThrottle(), inputs=['throttle', 'angle'], outputs=['left/throttle', 'right/throttle'])
+
+	autobot_motor = AutoBot_Actuator()
+	V.add(autobot_motor, inputs=['left/throttle', 'right/throttle'])
 
 
 	# add tub to save data
