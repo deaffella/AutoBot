@@ -1,5 +1,6 @@
-
+import logging
 from donkeycar.parts.controller import Joystick, JoystickController
+
 
 
 class DS4_Blue(Joystick):
@@ -34,8 +35,6 @@ class DS4_Blue(Joystick):
             0x10 : 'pad-hor',
             0x11 : 'pad-ver',
         }
-
-
 
 class DS4_BlueController(JoystickController):
     #A Controller object that maps inputs to actions

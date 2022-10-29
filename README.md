@@ -12,7 +12,7 @@ ___
 
 Робот -> Комп
 
-    rsync -rv --progress --partial nano@192.168.2.220:/home/nano/deaffy/AutoBot/donkey_car ~/projects/autobot/
+    rsync -rv --progress --partial nano@192.168.2.220:/home/nano/deaffy/AutoBot/donkey_car/DYNAMIC_DATA/data .
 
 
 Комп -> Робот

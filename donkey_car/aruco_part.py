@@ -36,42 +36,42 @@ def add_controller(V, cfg, use_joystick):
 		  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording', 'web/buttons'],
 		  threaded=True)
 
-	if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
+	if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT or os.path.exists(cfg.JOYSTICK_DEVICE_FILE):
+	# if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
 		# custom game controller mapping created with
 		# `donkey createjs` command
 		#
 		if cfg.CONTROLLER_TYPE == "custom":  # custom controller created with `donkey createjs` command
 			from joystics.ds4_blue import DS4_BlueController
-			platform_ctr = DS4_BlueController(
+			ctr = DS4_BlueController(
 				throttle_dir=cfg.JOYSTICK_THROTTLE_DIR,
 				throttle_scale=cfg.JOYSTICK_MAX_THROTTLE,
 				steering_scale=cfg.JOYSTICK_STEERING_SCALE,
 				auto_record_on_throttle=cfg.AUTO_RECORD_ON_THROTTLE)
-			platform_ctr.set_deadzone(cfg.JOYSTICK_DEADZONE)
+			ctr.set_deadzone(cfg.JOYSTICK_DEADZONE)
 		elif cfg.CONTROLLER_TYPE == "MM1":
 			from donkeycar.parts.robohat import RoboHATController
-			platform_ctr = RoboHATController(cfg)
+			ctr = RoboHATController(cfg)
 		elif cfg.CONTROLLER_TYPE == "mock":
 			from donkeycar.parts.controller import MockController
-			platform_ctr = MockController(steering=cfg.MOCK_JOYSTICK_STEERING,
+			ctr = MockController(steering=cfg.MOCK_JOYSTICK_STEERING,
 								 throttle=cfg.MOCK_JOYSTICK_THROTTLE)
 		else:
 			# game controller
 			#
 			from donkeycar.parts.controller import get_js_controller
-			platform_ctr = get_js_controller(cfg)
+			ctr = get_js_controller(cfg)
 			if cfg.USE_NETWORKED_JS:
 				from donkeycar.parts.controller import JoyStickSub
 				netwkJs = JoyStickSub(cfg.NETWORK_JS_SERVER_IP)
 				V.add(netwkJs, threaded=True)
-				platform_ctr.js = netwkJs
-		V.add(
-			platform_ctr,
-			# inputs=[input_image, 'user/mode', 'recording'],
-			inputs=['cam_top/image_array', 'cam_bot/image_array', 'user/mode', 'recording'],
-			outputs=['user/angle', 'user/throttle',
-					 'user/mode', 'recording'],
-			threaded=True)
+				ctr.js = netwkJs
+		V.add(ctr,
+			  # inputs=[input_image, 'user/mode', 'recording'],
+			  # inputs=['cam_top/image_array', 'cam_bot/image_array', 'user/mode', 'recording'],
+			  inputs=['cam_top/image_array', 'user/mode', 'recording'],
+			  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
+			  threaded=True)
 	return ctr
 
 
@@ -99,7 +99,6 @@ def dual_cam_drive(cfg,
 		else:
 			model_type = cfg.DEFAULT_MODEL_TYPE
 
-
 	# Initialize car
 	V = dk.Vehicle()
 
@@ -116,7 +115,6 @@ def dual_cam_drive(cfg,
 								capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
 								framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
 	V.add(cam_top, inputs=[], outputs=['cam_top/image_array'], threaded=True)
-
 
 	# setup bottom camera
 	cam_bot = Jetson_CSI_Camera(sensor_id=1,
@@ -245,7 +243,7 @@ def dual_cam_drive(cfg,
 	if model_path:
 		# If we have a model, create an appropriate Keras part
 		kl = dk.utils.get_model_by_type(model_type, cfg)
-		#
+
 		# get callback function to reload the model
 		# for the configured model format
 		#
@@ -303,11 +301,13 @@ def dual_cam_drive(cfg,
 				pass
 
 			#inputs = ['cam/image_array', "behavior/one_hot_state_array"]
-			inputs = ['cam_bot/image_array', "behavior/one_hot_state_array"]
+			# inputs = ['cam_bot/image_array', "behavior/one_hot_state_array"]
+			inputs = ['cam_top/image_array', "behavior/one_hot_state_array"]
 
 		else:
 			#inputs = ['cam/image_array']
-			inputs = ['cam_bot/image_array']
+			# inputs = ['cam_bot/image_array']
+			inputs = ['cam_top/image_array']
 
 		# collect model inference outputs
 		#
@@ -322,8 +322,8 @@ def dual_cam_drive(cfg,
 			from donkeycar.pipeline.augmentations import ImageAugmentation
 			# V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'), inputs=['cam/image_array'], outputs=['cam/image_array_trans'])
 			# inputs = ['cam/image_array_trans'] + inputs[1:]
-			V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'), inputs=['cam_bot/image_array'], outputs=['cam_bot/image_array_trans'])
-			inputs = ['cam_bot/image_array_trans'] + inputs[1:]
+			V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'), inputs=['cam_top/image_array'], outputs=['cam_top/image_array_trans'])
+			inputs = ['cam_top/image_array_trans'] + inputs[1:]
 		V.add(kl, inputs=inputs, outputs=outputs, run_condition='run_pilot')
 
 	# stop at a stop sign
@@ -336,7 +336,7 @@ def dual_cam_drive(cfg,
 							   cfg.STOP_SIGN_MAX_REVERSE_COUNT,
 							   cfg.STOP_SIGN_REVERSE_THROTTLE),
 			  # inputs=['cam/image_array', 'pilot/throttle'], outputs=['pilot/throttle', 'cam/image_array'])
-			  inputs=['cam_bot/image_array', 'pilot/throttle'], outputs=['pilot/throttle', 'cam_bot/image_array'])
+			  inputs=['cam_top/image_array', 'pilot/throttle'], outputs=['pilot/throttle', 'cam_top/image_array'])
 		V.add(ThrottleFilter(),
 			  inputs=['pilot/throttle'], outputs=['pilot/throttle'])
 
@@ -403,11 +403,15 @@ def dual_cam_drive(cfg,
 
 	# add tub to save data
 	if cfg.USE_LIDAR:
-		inputs = ['cam_top/image_array', 'cam_bot/image_array', 'lidar/dist_array', 'user/angle', 'user/throttle', 'user/mode']
-		types = ['image_array', 'image_array', 'nparray', 'float', 'float', 'str']
+		# inputs = ['cam_top/image_array', 'cam_bot/image_array', 'lidar/dist_array', 'user/angle', 'user/throttle', 'user/mode']
+		# types = ['image_array', 'image_array', 'nparray', 'float', 'float', 'str']
+		inputs = ['lidar/dist_array', 'user/angle', 'user/throttle', 'user/mode']
+		types = ['float', 'float', 'str']
 	else:
-		inputs = ['cam_top/image_array', 'cam_bot/image_array', 'user/angle', 'user/throttle', 'user/mode']
-		types = ['image_array', 'image_array', 'float', 'float', 'str']
+		# inputs = ['cam_top/image_array', 'cam_bot/image_array', 'user/angle', 'user/throttle', 'user/mode']
+		# types = ['image_array', 'image_array', 'float', 'float', 'str']
+		inputs = ['user/angle', 'user/throttle', 'user/mode']
+		types = ['float', 'float', 'str']
 	if cfg.HAVE_ODOM:
 		inputs += ['enc/speed']
 		types += ['float']
@@ -431,38 +435,26 @@ def dual_cam_drive(cfg,
 		V.add(mon, inputs=[], outputs=perfmon_outputs, threaded=True)
 
 
-	# # do we want to store new records into own dir or append to existing
-	# tub_path = TubHandler(path=cfg.DATA_PATH).create_tub_path() if cfg.AUTO_CREATE_NEW_TUB else cfg.DATA_PATH
-	# meta += getattr(cfg, 'METADATA', [])
-	# tub_writer = TubWriter(tub_path, inputs=inputs, types=types, metadata=meta)
-	# V.add(tub_writer, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
-
 	current_tub_path = cfg.DATA_PATH
 	if cfg.AUTO_CREATE_NEW_TUB:
 		current_tub_path = TubHandler(path=cfg.DATA_PATH).create_tub_path()
 	meta += getattr(cfg, 'METADATA', [])
-	tub_writer = TubWriter(current_tub_path, inputs=inputs, types=types, metadata=meta)
-	V.add(tub_writer, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
 
+	cam_top_tub_writer = TubWriter(f'{current_tub_path}/cam_top', inputs=inputs + ['cam/image_array', ], types=types + ['image_array', ], metadata=meta)
+	V.add(cam_top_tub_writer, inputs=inputs + ['cam_top/image_array', ], outputs=["tub/num_records"], run_condition='recording')
 
-	# meta += getattr(cfg, 'METADATA', [])
-	# cam_top_tub_writer = TubWriter(f'{current_tub_path}/cam_top', inputs=inputs + ['cam_top/image_array', ], types=types, metadata=meta)
-	# cam_top_tub_writer = TubWriter(f'{current_tub_path}/cam_top', inputs=inputs + ['cam_top/image_array', ], types=types, metadata=meta)
-	# cam_bot_tub_writer = TubWriter(f'{current_tub_path}/cam_bot', inputs=inputs + ['cam_bot/image_array', ], types=types, metadata=meta)
-	#
-	# V.add(cam_top_tub_writer, inputs=inputs + ['cam_top/image_array', ], outputs=["tub/num_records"], run_condition='recording')
-
-	# top_camera_tub_path
-
+	cam_bot_tub_writer = TubWriter(f'{current_tub_path}/cam_bot', inputs=inputs + ['cam/image_array', ], types=types + ['image_array', ], metadata=meta)
+	V.add(cam_bot_tub_writer, inputs=inputs + ['cam_bot/image_array', ], outputs=["tub/num_records"], run_condition='recording')
 
 
 
 	print(f"{'-'*20}\n{'-'*20}\n{'-'*20}\n")
-	print(f"You can now go to:\n\n<your hostname.local>:{cfg.WEB_CONTROL_PORT}\nto drive your car.")
+	print(f"You can now go to:\n\n<your hostname.local>:{cfg.WEB_CONTROL_PORT}\nto drive your car.\n")
 	if has_input_controller:
-		print("You can now move your controller to drive your car.")
+		print("\nYou can now move your controller to drive your car.\n")
 		if isinstance(ctr, JoystickController):
-			ctr.set_tub(tub_writer.tub)
+			# ctr.set_tub(tub_writer.tub)
+			ctr.set_tub(cam_top_tub_writer.tub)
 			ctr.print_controls()
 
 	return V
@@ -474,52 +466,8 @@ if __name__ == '__main__':
 
 	cfg = dk.load_config(myconfig='myconfig.py', config_path='config.py')
 
-
-	# V = dk.Vehicle()
-	#
-	# # add_camera(V=V, cfg=cfg)
-	# cam_top = Jetson_CSI_Camera(sensor_id=0,
-	# 							image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
-	# 							capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
-	# 							framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
-	# V.add(cam_top, inputs=[], outputs=['cam_top/image_array'], threaded=True)
-	#
-	# cam_bot = Jetson_CSI_Camera(sensor_id=1,
-	# 							image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
-	# 							capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
-	# 							framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
-	# V.add(cam_bot, inputs=[], outputs=['cam_bot/image_array'], threaded=True)
-	#
-	#
-	# V.add(FrequencyLogger(cfg.FPS_DEBUG_INTERVAL), outputs=["fps/current", "fps/fps_list"])
-	#
-	#
-	# has_input_controller = hasattr(cfg, "CONTROLLER_TYPE") and cfg.CONTROLLER_TYPE != "mock"
-	# ctr = LocalWebController(port=cfg.WEB_CONTROL_PORT, mode=cfg.WEB_INIT_MODE)
-	# V.add(ctr,
-	# 	  inputs=['cam_top/image_array', 'cam_bot/image_array', 'tub/num_records', 'user/mode', 'recording'],
-	# 	  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording', 'web/buttons'],
-	# 	  threaded=True)
-	#
-	#
-	#
-	#
-	#
-	# # explode the buttons into their own key/values in memory
-	# #
-	# V.add(ExplodeDict(V.mem, "web/"), inputs=['web/buttons'])
-	#
-	# # adding a button handler is just adding a part with a run_condition
-	# # set to the button's name, so it runs when button is pressed.
-	# #
-	# V.add(Lambda(lambda v: print(f"web/w1 clicked")), inputs=["web/w1"], run_condition="web/w1")
-	# V.add(Lambda(lambda v: print(f"web/w2 clicked")), inputs=["web/w2"], run_condition="web/w2")
-	# V.add(Lambda(lambda v: print(f"web/w3 clicked")), inputs=["web/w3"], run_condition="web/w3")
-	# V.add(Lambda(lambda v: print(f"web/w4 clicked")), inputs=["web/w4"], run_condition="web/w4")
-	# V.add(Lambda(lambda v: print(f"web/w5 clicked")), inputs=["web/w5"], run_condition="web/w5")
-
-
-	V = dual_cam_drive(cfg=cfg)
-
-
+	V = dual_cam_drive(cfg=cfg,
+					   model_path=f'{cfg.MODELS_PATH}/{cfg.MODEL}' if type(cfg.MODEL) != type(None) else None,
+					   model_type=cfg.DEFAULT_MODEL_TYPE,
+					   )
 	V.start()

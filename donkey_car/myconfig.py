@@ -28,7 +28,7 @@ DRIVE_LOOP_HZ = 20
 
 ### CAMERAS ------------------------------------------------------------------------------------------------------------
 CAMERA_TYPE = "JETSON_CSIC"			# (MOCK | JETSON_CSIC | CSIC | PICAM | WEBCAM | CVCAM | V4L | D435 | IMAGE_LIST)
-CAMERA_SENSOR_ID = 1				# [0 - stable] \\ [1 -
+CAMERA_SENSOR_ID = 0				# [0 - stable] \\ [1 -
 CSIC_CAM_GSTREAMER_FLIP_PARM = 2	# (0 => none , 4 => Flip horizontally, 6 => Flip vertically)
 # IMAGE_W, IMAGE_H = 224, 224		# default
 IMAGE_W, IMAGE_H = 320, 240			# custom
@@ -52,20 +52,19 @@ USE_JOYSTICK_AS_DEFAULT = False
 SHOW_FPS = True
 FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency info into the shell
 
-HAVE_PERFMON=False
-# HAVE_PERFMON=True
 
 ### AUTOPILOT MODELS ---------------------------------------------------------------------------------------------------
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)
 # pytorch models: (resnet18)
-DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
-# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-10-20_0.tflite'
+# DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
+DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-10-29_1.tflite'
 
 
 ### TRAIN MODELS -------------------------------------------------------------------------------------------------------
 SEND_BEST_MODEL_TO_PI = False   #change to true to automatically send best model during training
 CREATE_TF_LITE 	 	  = True    # automatically create tflite model in training
 CREATE_TENSOR_RT 	  = False   # automatically create tensorrt model in training
+# CREATE_TENSOR_RT 	  = True   # automatically create tensorrt model in training
 MAX_EPOCHS 		 	  = 10
 # MAX_EPOCHS 		 	  = 2
 
