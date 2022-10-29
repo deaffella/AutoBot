@@ -49,9 +49,6 @@ def add_controller(V, cfg, use_joystick):
 				steering_scale=cfg.JOYSTICK_STEERING_SCALE,
 				auto_record_on_throttle=cfg.AUTO_RECORD_ON_THROTTLE)
 			ctr.set_deadzone(cfg.JOYSTICK_DEADZONE)
-		elif cfg.CONTROLLER_TYPE == "MM1":
-			from donkeycar.parts.robohat import RoboHATController
-			ctr = RoboHATController(cfg)
 		elif cfg.CONTROLLER_TYPE == "mock":
 			from donkeycar.parts.controller import MockController
 			ctr = MockController(steering=cfg.MOCK_JOYSTICK_STEERING,
@@ -128,7 +125,6 @@ def dual_cam_drive(cfg,
 		from donkeycar.parts.fps import FrequencyLogger
 		V.add(FrequencyLogger(cfg.FPS_DEBUG_INTERVAL), outputs=["fps/current", "fps/fps_list"])
 
-
 	# add the user input controller(s)
 	# - this will add the web controller
 	# - it will optionally add any configured 'joystick' controller
@@ -149,7 +145,6 @@ def dual_cam_drive(cfg,
 	V.add(Lambda(lambda v: print(f"web/w3 clicked")), inputs=["web/w3"], run_condition="web/w3")
 	V.add(Lambda(lambda v: print(f"web/w4 clicked")), inputs=["web/w4"], run_condition="web/w4")
 	V.add(Lambda(lambda v: print(f"web/w5 clicked")), inputs=["web/w5"], run_condition="web/w5")
-
 
 	# this throttle filter will allow one tap back for esc reverse
 	th_filter = ThrottleFilter()
@@ -402,25 +397,16 @@ def dual_cam_drive(cfg,
 
 
 	# add tub to save data
-	if cfg.USE_LIDAR:
-		# inputs = ['cam_top/image_array', 'cam_bot/image_array', 'lidar/dist_array', 'user/angle', 'user/throttle', 'user/mode']
-		# types = ['image_array', 'image_array', 'nparray', 'float', 'float', 'str']
-		inputs = ['lidar/dist_array', 'user/angle', 'user/throttle', 'user/mode']
-		types = ['float', 'float', 'str']
-	else:
-		# inputs = ['cam_top/image_array', 'cam_bot/image_array', 'user/angle', 'user/throttle', 'user/mode']
-		# types = ['image_array', 'image_array', 'float', 'float', 'str']
-		inputs = ['user/angle', 'user/throttle', 'user/mode']
-		types = ['float', 'float', 'str']
+	# inputs = ['cam_top/image_array', 'cam_bot/image_array', 'user/angle', 'user/throttle', 'user/mode']
+	# types = ['image_array', 'image_array', 'float', 'float', 'str']
+	inputs = ['user/angle', 'user/throttle', 'user/mode']
+	types = ['float', 'float', 'str']
 	if cfg.HAVE_ODOM:
 		inputs += ['enc/speed']
 		types += ['float']
 	if cfg.TRAIN_BEHAVIORS:
 		inputs += ['behavior/state', 'behavior/label', "behavior/one_hot_state_array"]
 		types += ['int', 'str', 'vector']
-	if cfg.CAMERA_TYPE == "D435" and cfg.REALSENSE_D435_DEPTH:
-		inputs += ['cam/depth_array']
-		types += ['gray16_array']
 
 	if cfg.RECORD_DURING_AI:
 		inputs += ['pilot/angle', 'pilot/throttle']
@@ -445,7 +431,6 @@ def dual_cam_drive(cfg,
 
 	cam_bot_tub_writer = TubWriter(f'{current_tub_path}/cam_bot', inputs=inputs + ['cam/image_array', ], types=types + ['image_array', ], metadata=meta)
 	V.add(cam_bot_tub_writer, inputs=inputs + ['cam_bot/image_array', ], outputs=["tub/num_records"], run_condition='recording')
-
 
 
 	print(f"{'-'*20}\n{'-'*20}\n{'-'*20}\n")
