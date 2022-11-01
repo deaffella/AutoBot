@@ -43,7 +43,6 @@ def add_controller(V, cfg, use_joystick):
 		  threaded=True)
 
 	if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT or os.path.exists(cfg.JOYSTICK_DEVICE_FILE):
-	# if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
 		# custom game controller mapping created with
 		# `donkey createjs` command
 		#
@@ -116,8 +115,13 @@ def dual_cam_drive(cfg,
 	V.add(autobot_actuator, inputs=['left/throttle', 'right/throttle'])
 
 	autobot_flashlight = AutoBot_Flashlight()
+	# V.add(autobot_flashlight, outputs=['odometry/flashlight'])
+
 	autobot_uv_flashlight = AutoBot_UV_Flashlight()
+	# V.add(autobot_uv_flashlight, outputs=['odometry/uv_flashlight'])
+
 	autobot_camera_servo = AutoBot_Camera_Servo()
+	# V.add(autobot_camera_servo, outputs=['odometry/camera_servo'])
 
 	# setup top camera
 	cam_top = Jetson_CSI_Camera(sensor_id=0,
@@ -147,12 +151,10 @@ def dual_cam_drive(cfg,
 
 
 	# explode the buttons into their own key/values in memory
-	#
 	V.add(ExplodeDict(V.mem, "web/"), inputs=['web/buttons'])
 
 	# adding a button handler is just adding a part with a run_condition
 	# set to the button's name, so it runs when button is pressed.
-	#
 	V.add(Lambda(lambda v: autobot_flashlight.run(0)), 		inputs=["web/w1"],	run_condition="web/w1")
 	V.add(Lambda(lambda v: autobot_flashlight.run(100)), 	inputs=["web/w2"],	run_condition="web/w2")
 	V.add(Lambda(lambda v: autobot_uv_flashlight.run(100)), inputs=["web/w3"],	run_condition="web/w3")
@@ -365,9 +367,7 @@ def dual_cam_drive(cfg,
 
 	# Choose what inputs should change the car.
 	class DriveMode:
-		def run(self, mode,
-				user_angle, user_throttle,
-				pilot_angle, pilot_throttle):
+		def run(self, mode, user_angle, user_throttle, pilot_angle, pilot_throttle):
 			if mode == 'user':
 				return user_angle, user_throttle
 			elif mode == 'local_angle':
@@ -377,10 +377,7 @@ def dual_cam_drive(cfg,
 					   pilot_throttle * cfg.AI_THROTTLE_MULT \
 						   if pilot_throttle else 0.0
 
-	V.add(DriveMode(),
-		  inputs=['user/mode', 'user/angle', 'user/throttle',
-				  'pilot/angle', 'pilot/throttle'],
-		  outputs=['angle', 'throttle'])
+	V.add(DriveMode(), inputs=['user/mode', 'user/angle', 'user/throttle', 'pilot/angle', 'pilot/throttle'], outputs=['angle', 'throttle'])
 
 	if (cfg.CONTROLLER_TYPE != "pigpio_rc") and (cfg.CONTROLLER_TYPE != "MM1"):
 		if isinstance(ctr, JoystickController):
@@ -410,17 +407,8 @@ def dual_cam_drive(cfg,
 	if cfg.RECORD_DURING_AI:
 		V.add(AiRecordingCondition(), inputs=['user/mode', 'recording'], outputs=['recording'])
 
-	# Setup drivetrain
 	# add_drivetrain(V, cfg)
-
 	V.add(TwoWheelSteeringThrottle(), inputs=['throttle', 'angle'], outputs=['left/throttle', 'right/throttle'])
-
-	# autobot_motor = AutoBot_Actuator()
-	# V.add(autobot_motor, inputs=['left/throttle', 'right/throttle'])
-
-	# autobot_flashlight = AutoBot_Flashlight()
-	# autobot_uv_flashlight = AutoBot_UV_Flashlight()
-	# autobot_camera_servo = AutoBot_Camera_Servo()
 
 
 	# add tub to save data
@@ -428,9 +416,10 @@ def dual_cam_drive(cfg,
 	# types = ['image_array', 'image_array', 'float', 'float', 'str']
 	inputs = ['user/angle', 'user/throttle', 'user/mode']
 	types = ['float', 'float', 'str']
-	if cfg.HAVE_ODOM:
-		inputs += ['enc/speed']
-		types += ['float']
+
+	# if cfg.HAVE_ODOM:
+	# 	inputs += ['enc/speed']
+	# 	types += ['float']
 	if cfg.TRAIN_BEHAVIORS:
 		inputs += ['behavior/state', 'behavior/label', "behavior/one_hot_state_array"]
 		types += ['int', 'str', 'vector']
@@ -446,6 +435,10 @@ def dual_cam_drive(cfg,
 		inputs += perfmon_outputs
 		types += ['float', 'float', 'float']
 		V.add(mon, inputs=[], outputs=perfmon_outputs, threaded=True)
+
+	if cfg.ENABLE_AUTOBOT_ODOM:
+		inputs += ['odometry/flashlight', 'odometry/uv_flashlight', 'odometry/camera_servo']
+		types += ['int', 'int', 'int']
 
 
 	current_tub_path = cfg.DATA_PATH

@@ -42,9 +42,13 @@ CONTROLLER_TYPE = 'custom'          # (ps3|ps4|xbox|pigpio_rc|nimbus|wiiu|F710|r
 JOYSTICK_MAX_THROTTLE = 1
 
 
+### AUTOBOT ODOMETRY ---------------------------------------------------------------------------------------------------
+ENABLE_AUTOBOT_ODOM = False
+# ENABLE_AUTOBOT_ODOM = True
+
 ### GAMEPAD ------------------------------------------------------------------------------------------------------------
-USE_JOYSTICK_AS_DEFAULT = False
-# USE_JOYSTICK_AS_DEFAULT = True
+# USE_JOYSTICK_AS_DEFAULT = False
+USE_JOYSTICK_AS_DEFAULT = True
 
 
 ### FPS COUNTER ------------------------------------------------------------------------------------------------------------
@@ -56,8 +60,8 @@ FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency 
 ### AUTOPILOT MODELS ---------------------------------------------------------------------------------------------------
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)
 # pytorch models: (resnet18)
-DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
-# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-10-29_1.tflite'
+# DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
+DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-10-29_1.tflite'
 
 
 ### TRAIN MODELS -------------------------------------------------------------------------------------------------------
