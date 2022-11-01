@@ -698,8 +698,8 @@ class AutoBot_Actuator(object):
 		self.right_throttle = 0
 
 	def run(self,
-			left_throttle: float,
-			right_throttle: float) -> None:
+			left_throttle: float = 0,
+			right_throttle: float = 0) -> None:
 		global autobot_platform
 
 		if left_throttle is None:
@@ -733,7 +733,9 @@ class AutoBot_Flashlight(object):
 		self.running = True
 		self.value = 0
 
-	def run(self, value: int) -> int:
+	def run(self, value: int = 0) -> int or None:
+		if value is None:
+			return None
 		global autobot_platform
 		autobot_platform.flashlight_set(value=value)
 		self.value = value
@@ -747,7 +749,9 @@ class AutoBot_UV_Flashlight(object):
 		self.running = True
 		self.value = 0
 
-	def run(self, value: int) -> int:
+	def run(self, value: int = 0) -> int or None:
+		if value is None:
+			return None
 		global autobot_platform
 		assert 0 <= value <= 100
 		autobot_platform.uv_flashlight_set(value=value)
@@ -762,13 +766,93 @@ class AutoBot_Camera_Servo(object):
 		self.running = True
 		self.value = 0
 
-	def run(self, value: int) -> int:
+	def run(self, value: int) -> int or None:
+		if value is None:
+			return None
 		global autobot_platform
 		autobot_platform.camera_servo_set(angle=value)
 		self.value = value
 
 	def shutdown(self):
 		self.run(90)
+
+
+class Sensor_RFID(object):
+	def __init__(self):
+		self.running = True
+		self.value = ""
+
+	def run(self) -> str:
+		self.get_data_from_device()
+		return self.value
+
+	def get_data_from_device(self):
+		global autobot_platform
+		value = autobot_platform.rfid_get()
+		if type(value) == type(None):
+			value = ""
+		if value != self.value:
+			logger.info(f"[Sensor_RFID]: {value}")
+		self.value = value
+
+
+
+class Sensor_Battery(object):
+	def __init__(self):
+		self.running = True
+		self.value = 0
+
+	def run(self) -> int:
+		self.get_data_from_device()
+		return self.value
+
+	def get_data_from_device(self):
+		global autobot_platform
+		value = autobot_platform.battery_get()
+		if type(value) == type(None):
+			value = 0
+		self.value = value
+
+
+class Sensor_US(object):
+	def __init__(self):
+		self.running = True
+		self.value = {int(ir_sensor_idx): 255 for ir_sensor_idx in range(5)}
+
+	def run(self) -> List[int]:
+		self.get_data_from_device()
+		# return self.value
+		return [self.value[sensor_idx] for sensor_idx in range(5)]
+
+	def get_data_from_device(self):
+		global autobot_platform
+		value = autobot_platform.us_get()
+		for _key, _item in value.items():
+			if type(_item) == type(None):
+				self.value[_key] = 255
+			else:
+				self.value[_key] = _item
+
+
+class Sensor_IR(object):
+	def __init__(self):
+		self.running = True
+		self.value = {int(ir_sensor_idx): 255 for ir_sensor_idx in range(5)}
+
+	def run(self) -> List[int]:
+		self.get_data_from_device()
+		# return self.value
+		return [self.value[sensor_idx] for sensor_idx in range(5)]
+
+	def get_data_from_device(self):
+		global autobot_platform
+		value = autobot_platform.ir_get()
+		for _key, _item in value.items():
+			if type(_item) == type(None):
+				self.value[_key] = 255
+			else:
+				self.value[_key] = _item
+
 
 
 

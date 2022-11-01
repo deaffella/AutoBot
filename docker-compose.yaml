@@ -11,6 +11,7 @@ services:
       dockerfile: dockerfiles/l4t_cv_tf.Dockerfile
     container_name: l4t
     image: autobot:l4t_cv_tf
+    restart: "always"
     #network_mode: host
     #privileged: true
     tty: true

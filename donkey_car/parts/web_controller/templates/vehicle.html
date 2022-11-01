@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+<link rel="stylesheet" href="static/style.css">{% extends "base.html" %}
 {% block content %}
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <div class="container">
@@ -18,34 +18,49 @@
             </button>
         </form>
 
+
+        <!-- video -->
+        <div class="thumbnail">
+<!--          <img id='mpeg-image', class='img-responsive' src="/video"/> </img>-->
+          <img id='mpeg-image-top' class='img-responsive' src="/video_top"/> </img>
+        </div>
+
+        <!-- video -->
+        <div class="thumbnail">
+<!--          <img id='mpeg-image', class='img-responsive' src="/video"/> </img>-->
+          <img id='mpeg-image-bot' class='img-responsive' src="/video_bot"/> </img>
+        </div>
+      </div> <!-- end video column -->
+
+      <div id="joystick-column"  class="col-md-6">
+
+
         <!-- programmable buttons -->
         <form id="button_bar">
+          <br>
+          <br>Диоды:
           <button type="button" id="w1" class="btn btn-info">Выкл</button>
-          <button type="button" id="w2" class="btn btn-info">Фонарик</button>
+          <button type="button" id="w2" class="btn btn-info">Белый</button>
           <button type="button" id="w3" class="btn btn-info">УФ</button>
           <br>
-          <br>
-          <button type="button" id="w4" class="btn btn-info">30</button>
-          <button type="button" id="w5" class="btn btn-info">45</button>
-          <button type="button" id="w6" class="btn btn-info">60</button>
-          <button type="button" id="w7" class="btn btn-info">75</button>
-          <button type="button" id="w8" class="btn btn-info">90</button>
-          <button type="button" id="w9" class="btn btn-info">105</button>
-          <button type="button" id="w10" class="btn btn-info">120</button>
+          <br>Servo Angle:
+          <button type="button" id="w4" class="btn btn-info">15</button>
+          <button type="button" id="w5" class="btn btn-info">30</button>
+          <button type="button" id="w6" class="btn btn-info">45</button>
+          <button type="button" id="w7" class="btn btn-info">60</button>
+          <button type="button" id="w8" class="btn btn-info">75</button>
+          <button type="button" id="w9" class="btn btn-info">90</button>
+          <button type="button" id="w10" class="btn btn-info">105</button>
         </form>
 
-
-        <!-- video -->
-        <div class="thumbnail">
-<!--          <img id='mpeg-image', class='img-responsive' src="/video"/> </img>-->
-          <img id='mpeg-image-top', class='img-responsive' src="/video_top"/> </img>
+        <div style="text-align:center;color:rgb(255, 27, 65);display:inline-block">Note: physical game controller overrides web control.</div>
+        <!-- virtual joystick -->
+        <div id="joystick_outer" class="thumbnail">
+          <div id="joystick_container">
+            <p>Click/touch to use joystick.</p>
+          </div>
         </div>
 
-        <!-- video -->
-        <div class="thumbnail">
-<!--          <img id='mpeg-image', class='img-responsive' src="/video"/> </img>-->
-          <img id='mpeg-image-bot', class='img-responsive' src="/video_bot"/> </img>
-        </div>
 
         <!-- steering/throttle meters -->
         <div id="control-bars">
@@ -73,16 +88,6 @@
               <div id="throttle-bar-forward" class="progress-bar progress-bar-success" role="progressbar" style="width: 0%;">
               </div>
             </div>
-          </div>
-        </div>
-      </div> <!-- end video column -->
-
-      <div id="joystick-column"  class="col-md-6">
-        <div style="text-align:center;color:rgb(255, 27, 65);display:inline-block">Note: physical game controller overrides web control.</div>
-        <!-- virtual joystick -->
-        <div id="joystick_outer" class="thumbnail">
-          <div id="joystick_container">
-            <p>Click/touch to use joystick.</p>
           </div>
         </div>
 

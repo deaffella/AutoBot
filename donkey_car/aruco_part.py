@@ -28,6 +28,7 @@ from parts.web_controller.web import LocalWebController
 
 from parts.actuators import autobot_platform
 from parts.actuators import AutoBot_Actuator, AutoBot_Flashlight, AutoBot_UV_Flashlight, AutoBot_Camera_Servo
+from parts.actuators import Sensor_RFID, Sensor_Battery, Sensor_US, Sensor_IR
 
 
 
@@ -35,14 +36,14 @@ from parts.actuators import AutoBot_Actuator, AutoBot_Flashlight, AutoBot_UV_Fla
 
 
 
-def add_controller(V, cfg, use_joystick):
+def add_controller(V, cfg):
 	ctr = LocalWebController(port=cfg.WEB_CONTROL_PORT, mode=cfg.WEB_INIT_MODE)
 	V.add(ctr,
 		  inputs=['cam_top/image_array', 'cam_bot/image_array', 'tub/num_records', 'user/mode', 'recording'],
 		  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording', 'web/buttons'],
 		  threaded=True)
 
-	if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT or os.path.exists(cfg.JOYSTICK_DEVICE_FILE):
+	if cfg.USE_JOYSTICK_AS_DEFAULT and os.path.exists(cfg.JOYSTICK_DEVICE_FILE):
 		# custom game controller mapping created with
 		# `donkey createjs` command
 		#
@@ -79,7 +80,6 @@ def add_controller(V, cfg, use_joystick):
 
 def dual_cam_drive(cfg,
 				   model_path=None,
-				   use_joystick=False,
 				   model_type=None,
 				   meta=[]):
 	"""
@@ -115,13 +115,9 @@ def dual_cam_drive(cfg,
 	V.add(autobot_actuator, inputs=['left/throttle', 'right/throttle'])
 
 	autobot_flashlight = AutoBot_Flashlight()
-	# V.add(autobot_flashlight, outputs=['odometry/flashlight'])
-
 	autobot_uv_flashlight = AutoBot_UV_Flashlight()
-	# V.add(autobot_uv_flashlight, outputs=['odometry/uv_flashlight'])
-
 	autobot_camera_servo = AutoBot_Camera_Servo()
-	# V.add(autobot_camera_servo, outputs=['odometry/camera_servo'])
+
 
 	# setup top camera
 	cam_top = Jetson_CSI_Camera(sensor_id=0,
@@ -147,7 +143,7 @@ def dual_cam_drive(cfg,
 	# - it will optionally add any configured 'joystick' controller
 	#
 	has_input_controller = hasattr(cfg, "CONTROLLER_TYPE") and cfg.CONTROLLER_TYPE != "mock"
-	ctr = add_controller(V, cfg, use_joystick)
+	ctr = add_controller(V, cfg)
 
 
 	# explode the buttons into their own key/values in memory
@@ -158,13 +154,14 @@ def dual_cam_drive(cfg,
 	V.add(Lambda(lambda v: autobot_flashlight.run(0)), 		inputs=["web/w1"],	run_condition="web/w1")
 	V.add(Lambda(lambda v: autobot_flashlight.run(100)), 	inputs=["web/w2"],	run_condition="web/w2")
 	V.add(Lambda(lambda v: autobot_uv_flashlight.run(100)), inputs=["web/w3"],	run_condition="web/w3")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(30)), 	inputs=["web/w4"],	run_condition="web/w4")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(45)), 	inputs=["web/w5"],	run_condition="web/w5")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(60)), 	inputs=["web/w6"],	run_condition="web/w6")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(75)), 	inputs=["web/w7"],	run_condition="web/w7")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(90)), 	inputs=["web/w8"],	run_condition="web/w8")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(105)), 	inputs=["web/w9"],	run_condition="web/w9")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(120)), 	inputs=["web/w10"],	run_condition="web/w10")
+
+	V.add(Lambda(lambda v: autobot_camera_servo.run(15)), 	inputs=["web/w4"],	run_condition="web/w4")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(30)), 	inputs=["web/w5"],	run_condition="web/w5")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(45)), 	inputs=["web/w6"],	run_condition="web/w6")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(60)), 	inputs=["web/w7"],	run_condition="web/w7")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(75)), 	inputs=["web/w8"],	run_condition="web/w8")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(90)), 	inputs=["web/w9"],	run_condition="web/w9")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(105)), 	inputs=["web/w10"],	run_condition="web/w10")
 
 	# this throttle filter will allow one tap back for esc reverse
 	th_filter = ThrottleFilter()
@@ -417,9 +414,6 @@ def dual_cam_drive(cfg,
 	inputs = ['user/angle', 'user/throttle', 'user/mode']
 	types = ['float', 'float', 'str']
 
-	# if cfg.HAVE_ODOM:
-	# 	inputs += ['enc/speed']
-	# 	types += ['float']
 	if cfg.TRAIN_BEHAVIORS:
 		inputs += ['behavior/state', 'behavior/label', "behavior/one_hot_state_array"]
 		types += ['int', 'str', 'vector']
@@ -436,9 +430,28 @@ def dual_cam_drive(cfg,
 		types += ['float', 'float', 'float']
 		V.add(mon, inputs=[], outputs=perfmon_outputs, threaded=True)
 
-	if cfg.ENABLE_AUTOBOT_ODOM:
-		inputs += ['odometry/flashlight', 'odometry/uv_flashlight', 'odometry/camera_servo']
-		types += ['int', 'int', 'int']
+	if cfg.ENABLE_AUTOBOT_TELEMETRY:
+		V.add(Sensor_RFID(), inputs=[], outputs=['telemetry/rfid'], threaded=False)
+		# inputs += ['telemetry/rfid']
+		# types += ['str']
+
+		V.add(Sensor_Battery(), inputs=[], outputs=['telemetry/battery'], threaded=False)
+		inputs += ['telemetry/battery']
+		types += ['int']
+
+		V.add(Sensor_US(),
+			  inputs=[],
+			  outputs=['telemetry/us1', 'telemetry/us2', 'telemetry/us3', 'telemetry/us4', 'telemetry/us5'],
+			  threaded=False)
+		inputs += ['telemetry/us1', 'telemetry/us2', 'telemetry/us3', 'telemetry/us4', 'telemetry/us5']
+		types += ['int', 'int', 'int', 'int', 'int']
+
+		V.add(Sensor_IR(),
+			  inputs=[],
+			  outputs=['telemetry/ir1', 'telemetry/ir2', 'telemetry/ir3', 'telemetry/ir4', 'telemetry/ir5'],
+			  threaded=False)
+		inputs += ['telemetry/ir1', 'telemetry/ir2', 'telemetry/ir3', 'telemetry/ir4', 'telemetry/ir5']
+		types += ['int', 'int', 'int', 'int', 'int']
 
 
 	current_tub_path = cfg.DATA_PATH
@@ -447,10 +460,10 @@ def dual_cam_drive(cfg,
 	meta += getattr(cfg, 'METADATA', [])
 
 	cam_top_tub_writer = TubWriter(f'{current_tub_path}/cam_top', inputs=inputs + ['cam/image_array', ], types=types + ['image_array', ], metadata=meta)
-	V.add(cam_top_tub_writer, inputs=inputs + ['cam_top/image_array', ], outputs=["tub/num_records"], run_condition='recording')
+	V.add(cam_top_tub_writer, inputs=inputs + ['cam_top/image_array'], outputs=["tub/num_records"], run_condition='recording')
 
-	cam_bot_tub_writer = TubWriter(f'{current_tub_path}/cam_bot', inputs=inputs + ['cam/image_array', ], types=types + ['image_array', ], metadata=meta)
-	V.add(cam_bot_tub_writer, inputs=inputs + ['cam_bot/image_array', ], outputs=["tub/num_records"], run_condition='recording')
+	# cam_bot_tub_writer = TubWriter(f'{current_tub_path}/cam_bot', inputs=inputs + ['cam/image_array', ], types=types + ['image_array', ], metadata=meta)
+	# V.add(cam_bot_tub_writer, inputs=inputs + ['cam_bot/image_array'], outputs=["tub/num_records"], run_condition='recording')
 
 
 	print(f"{'-'*20}\n{'-'*20}\n{'-'*20}\n")
@@ -473,6 +486,5 @@ if __name__ == '__main__':
 
 	V = dual_cam_drive(cfg=cfg,
 					   model_path=f'{cfg.MODELS_PATH}/{cfg.MODEL}' if type(cfg.MODEL) != type(None) else None,
-					   model_type=cfg.DEFAULT_MODEL_TYPE,
-					   )
-	V.start()
+					   model_type=cfg.DEFAULT_MODEL_TYPE)
+	V.start(rate_hz=cfg.CAMERA_FRAMERATE)

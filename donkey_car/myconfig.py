@@ -23,12 +23,15 @@ DATA_PATH = os.path.join(DYNAMIC_DATA_DIR_PATH, 'data')
 MODELS_PATH = os.path.join(DYNAMIC_DATA_DIR_PATH, 'models')
 
 
-DRIVE_LOOP_HZ = 20
+# DRIVE_LOOP_HZ = 20
+DRIVE_LOOP_HZ = 10
+CAMERA_FRAMERATE = 20
+
 
 
 ### CAMERAS ------------------------------------------------------------------------------------------------------------
 CAMERA_TYPE = "JETSON_CSIC"			# (MOCK | JETSON_CSIC | CSIC | PICAM | WEBCAM | CVCAM | V4L | D435 | IMAGE_LIST)
-CAMERA_SENSOR_ID = 0				# [0 - stable] \\ [1 -
+CAMERA_SENSOR_ID = 0				# in double_cam.py mode specifies camera idx to write frames
 CSIC_CAM_GSTREAMER_FLIP_PARM = 2	# (0 => none , 4 => Flip horizontally, 6 => Flip vertically)
 # IMAGE_W, IMAGE_H = 224, 224		# default
 IMAGE_W, IMAGE_H = 320, 240			# custom
@@ -43,8 +46,8 @@ JOYSTICK_MAX_THROTTLE = 1
 
 
 ### AUTOBOT ODOMETRY ---------------------------------------------------------------------------------------------------
-ENABLE_AUTOBOT_ODOM = False
-# ENABLE_AUTOBOT_ODOM = True
+# ENABLE_AUTOBOT_TELEMETRY = False
+ENABLE_AUTOBOT_TELEMETRY = True
 
 ### GAMEPAD ------------------------------------------------------------------------------------------------------------
 # USE_JOYSTICK_AS_DEFAULT = False
@@ -60,8 +63,9 @@ FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency 
 ### AUTOPILOT MODELS ---------------------------------------------------------------------------------------------------
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)
 # pytorch models: (resnet18)
-# DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
-DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-10-29_1.tflite'
+DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
+# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'home_black_10k.h5'
+# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'spiiras_red_20k.tflite'
 
 
 ### TRAIN MODELS -------------------------------------------------------------------------------------------------------
