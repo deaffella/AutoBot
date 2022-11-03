@@ -111,8 +111,7 @@ def dual_cam_drive(cfg,
 		ch.setFormatter(logging.Formatter(cfg.LOGGING_FORMAT))
 		logger.addHandler(ch)
 
-	autobot_actuator = AutoBot_Actuator()
-	V.add(autobot_actuator, inputs=['left/throttle', 'right/throttle'])
+	V.add(AutoBot_Actuator(), inputs=['left/throttle', 'right/throttle'])
 
 	autobot_flashlight = AutoBot_Flashlight()
 	autobot_uv_flashlight = AutoBot_UV_Flashlight()
@@ -151,17 +150,20 @@ def dual_cam_drive(cfg,
 
 	# adding a button handler is just adding a part with a run_condition
 	# set to the button's name, so it runs when button is pressed.
-	V.add(Lambda(lambda v: autobot_flashlight.run(0)), 		inputs=["web/w1"],	run_condition="web/w1")
-	V.add(Lambda(lambda v: autobot_flashlight.run(100)), 	inputs=["web/w2"],	run_condition="web/w2")
-	V.add(Lambda(lambda v: autobot_uv_flashlight.run(100)), inputs=["web/w3"],	run_condition="web/w3")
+	V.add(Lambda(lambda v: print('!!!!!!!!!!!')), 			inputs=["web/remove_data_last_100"], run_condition="web/remove_data_last_100")
+	V.add(Lambda(lambda v: print('!!!!!!!!!!!')), 			inputs=["web/remove_data_all"],	run_condition="web/remove_data_all")
 
-	V.add(Lambda(lambda v: autobot_camera_servo.run(15)), 	inputs=["web/w4"],	run_condition="web/w4")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(30)), 	inputs=["web/w5"],	run_condition="web/w5")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(45)), 	inputs=["web/w6"],	run_condition="web/w6")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(60)), 	inputs=["web/w7"],	run_condition="web/w7")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(75)), 	inputs=["web/w8"],	run_condition="web/w8")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(90)), 	inputs=["web/w9"],	run_condition="web/w9")
-	V.add(Lambda(lambda v: autobot_camera_servo.run(105)), 	inputs=["web/w10"],	run_condition="web/w10")
+	V.add(Lambda(lambda v: autobot_flashlight.run(0)), 		inputs=["web/fl_off"],			run_condition="web/fl_off")
+	V.add(Lambda(lambda v: autobot_flashlight.run(100)), 	inputs=["web/fl_on"],			run_condition="web/fl_on")
+	V.add(Lambda(lambda v: autobot_uv_flashlight.run(100)), inputs=["web/uvfl_on"],			run_condition="web/uvfl_on")
+
+	V.add(Lambda(lambda v: autobot_camera_servo.run(15)), 	inputs=["web/cam_servo_15"],	run_condition="web/cam_servo_15")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(30)), 	inputs=["web/cam_servo_30"],	run_condition="web/cam_servo_30")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(45)), 	inputs=["web/cam_servo_45"],	run_condition="web/cam_servo_45")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(60)), 	inputs=["web/cam_servo_60"],	run_condition="web/cam_servo_60")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(75)), 	inputs=["web/cam_servo_75"],	run_condition="web/cam_servo_75")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(90)), 	inputs=["web/cam_servo_90"],	run_condition="web/cam_servo_90")
+	V.add(Lambda(lambda v: autobot_camera_servo.run(105)), 	inputs=["web/cam_servo_105"],	run_condition="web/cam_servo_105")
 
 	# this throttle filter will allow one tap back for esc reverse
 	th_filter = ThrottleFilter()
@@ -409,8 +411,6 @@ def dual_cam_drive(cfg,
 
 
 	# add tub to save data
-	# inputs = ['cam_top/image_array', 'cam_bot/image_array', 'user/angle', 'user/throttle', 'user/mode']
-	# types = ['image_array', 'image_array', 'float', 'float', 'str']
 	inputs = ['user/angle', 'user/throttle', 'user/mode']
 	types = ['float', 'float', 'str']
 
