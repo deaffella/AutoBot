@@ -83,3 +83,27 @@ ROI_TRAPEZE_UL 		= int(IMAGE_W / 4) 			# top-left     dot
 ROI_TRAPEZE_UR 		= IMAGE_W - ROI_TRAPEZE_UL 	# top-right    dot
 ROI_TRAPEZE_MIN_Y 	= 0
 ROI_TRAPEZE_MAX_Y 	= IMAGE_H
+
+
+### ARUCO SIGNS --------------------------------------------------------------------------------------------------------
+ARUCO_SIGNS_DICT = {
+	0: 'stop',
+	1: 'start',
+
+	2: 'cross_left',
+	3: 'cross_forward',
+	4: 'cross_right',
+
+	5: 'speed_down',
+	6: 'speed_up',
+
+	7: 'rotate-90',
+	8: 'rotate-180',
+	9: 'rotate-270',
+	10: 'rotate-360',
+
+	11: 'rotate+90',
+	12: 'rotate+180',
+	13: 'rotate+270',
+	14: 'rotate+360',
+}
