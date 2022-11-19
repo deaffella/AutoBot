@@ -86,6 +86,7 @@ ROI_TRAPEZE_MAX_Y 	= IMAGE_H
 
 
 ### ARUCO SIGNS --------------------------------------------------------------------------------------------------------
+ARUCO_SIGNS_SAVE_TO_DIR = True
 ARUCO_SIGNS_DICT = {
 	0: 'stop',
 	1: 'start',

@@ -10,7 +10,7 @@ ___
 ___
 
 
-Робот -> Комп
+Робот -> Комп (на компе нужно быть в папке `AutoBot/donkey_car/DYNAMIC_DATA/`)
 
     rsync -rv --progress --partial nano@192.168.2.220:/home/nano/deaffy/AutoBot/donkey_car/DYNAMIC_DATA/data .
 

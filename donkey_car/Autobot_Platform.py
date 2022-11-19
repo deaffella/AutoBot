@@ -206,7 +206,9 @@ def dual_cam_drive(cfg,
 		V.add(FrequencyLogger(cfg.FPS_DEBUG_INTERVAL), outputs=["fps/current", "fps/fps_list"])
 
 	aruco_sign_detector = ArucoSignDetector(signs_dict=cfg.ARUCO_SIGNS_DICT)
-	# V.add(aruco_sign_detector, inputs=['cam_bot/pure_image'], outputs=['cam_bot/image_array'], threaded=False)
+	if cfg.ARUCO_SIGNS_SAVE_TO_DIR:
+		aruco_sign_detector.save_signs_to_dir()
+
 	V.add(aruco_sign_detector,
 		  inputs=['cam_bot/pure_image'],
 		  outputs=['cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds'],
