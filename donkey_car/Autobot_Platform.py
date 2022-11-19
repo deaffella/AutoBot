@@ -40,6 +40,7 @@ def remove_collected_data(dir_path: str):
 	print(f'REMOVED:\t{dir_path}')
 
 
+
 def add_controller(V, cfg):
 	ctr = LocalWebController(port=cfg.WEB_CONTROL_PORT, mode=cfg.WEB_INIT_MODE)
 	V.add(ctr,
