@@ -91,6 +91,12 @@ PI_HOSTNAME = '192.168.2.220'
 
 # ~/deaffy/AutoBot/donkey_car/DYNAMIC_DATA/data
 # ~/deaffy/AutoBot/donkey_car/DYNAMIC_DATA/data/cam_top
+# ~/deaffy/AutoBot/donkey_car/data/cam_top
+# /home/nano/deaffy/AutoBot/donkey_car/data/cam_top
+# /home/nano/deaffy/AutoBot/donkey_car/data
+
+# /home/nano/deaffy/AutoBot/donkey_car/data/cam_top
+# ~/deaffy/AutoBot/donkey_car
 
 ### ARUCO SIGNS --------------------------------------------------------------------------------------------------------
 ARUCO_SIGNS_SAVE_TO_DIR = True

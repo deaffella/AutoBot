@@ -522,7 +522,7 @@ def dual_cam_drive(cfg,
 		current_tub_path = TubHandler(path=cfg.DATA_PATH).create_tub_path()
 	meta += getattr(cfg, 'METADATA', [])
 
-	cam_top_tub_writer = TubWriter(f'{current_tub_path}/cam_top', inputs=inputs + ['cam/image_array', ],
+	cam_top_tub_writer = TubWriter(f'{current_tub_path}', inputs=inputs + ['cam/image_array', ],
 								   types=types + ['image_array', ], metadata=meta)
 	V.add(cam_top_tub_writer, inputs=inputs + ['cam_top/image_array'], outputs=["tub/num_records"],
 		  run_condition='recording')
