@@ -18,9 +18,8 @@ AUTO_CREATE_NEW_TUB = False
 # AutoBot/donkey_car/
 # DONKEY_CAR_DIR_PATH = CAR_PATH = PACKAGE_PATH = os.path.dirname(os.path.realpath(__file__ + '/../'))
 DONKEY_CAR_DIR_PATH = CAR_PATH = PACKAGE_PATH = os.path.dirname(os.path.realpath(__file__))
-DYNAMIC_DATA_DIR_PATH = os.path.join(CAR_PATH, 'DYNAMIC_DATA')
-DATA_PATH = os.path.join(DYNAMIC_DATA_DIR_PATH, 'data')
-MODELS_PATH = os.path.join(DYNAMIC_DATA_DIR_PATH, 'models')
+DATA_PATH = os.path.join(DONKEY_CAR_DIR_PATH, 'data')
+MODELS_PATH = os.path.join(DONKEY_CAR_DIR_PATH, 'models')
 
 
 # DRIVE_LOOP_HZ = 20
@@ -84,6 +83,14 @@ ROI_TRAPEZE_UR 		= IMAGE_W - ROI_TRAPEZE_UL 	# top-right    dot
 ROI_TRAPEZE_MIN_Y 	= 0
 ROI_TRAPEZE_MAX_Y 	= IMAGE_H
 
+
+# DONKEY UI CAR CONNECTOR
+PI_USERNAME = 'nano'
+PI_HOSTNAME = '192.168.2.220'
+
+
+# ~/deaffy/AutoBot/donkey_car/DYNAMIC_DATA/data
+# ~/deaffy/AutoBot/donkey_car/DYNAMIC_DATA/data/cam_top
 
 ### ARUCO SIGNS --------------------------------------------------------------------------------------------------------
 ARUCO_SIGNS_SAVE_TO_DIR = True

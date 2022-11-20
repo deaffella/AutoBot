@@ -6,6 +6,19 @@ ___
     https://github.com/robwaat/Tutorial/blob/master/Jetson%20Disable%20Wifi%20Power%20Management.md
     
 
+### Donkey UI
+___
+
+На хосте запускаем `donkey ui`.
+Для автоматического подключения по ssh к роботу, нужно отредактировать `myconfig.py`.
+ 
+    PI_USERNAME = pi
+    PI_HOSTNAME = some_pi_hostname_or_ip
+    
+Дополнительная информация о создании и копировании сертификата
+
+    https://docs.donkeycar.com/utility/ui/#the-car-connection
+
 ### Sync Files
 ___
 

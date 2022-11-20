@@ -2,5 +2,7 @@
 .idea/*
 */__pycache__/
 */.ipynb_checkpoints/
-/donkey_car/DYNAMIC_DATA/data/
-donkey_car/DYNAMIC_DATA/models/
+
+data/*
+models/*
+logs/*
