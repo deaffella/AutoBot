@@ -47,6 +47,7 @@ sleep 1
 
 cd ${project_dir_path}
 
+docker pull naisy/donkeycar-pc:overdrive4
 
 docker-compose -p "${docker_stack_name}" -f server-docker-compose.yaml down
 

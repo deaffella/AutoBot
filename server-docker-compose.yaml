@@ -32,9 +32,7 @@ services:
       - /etc/enctune.conf:/etc/enctune.conf
       - /etc/localtime:/etc/localtime:ro
       - /dev/:/dev/
-      #- $HOST_USER_XAUTH:$DOCKER_USER_XAUTH
-      - /home/$USER/.Xauthority/:/home/ubuntu/.Xauthority
-      - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
+      #- /home/$USER/.Xauthority/:/home/ubuntu/.Xauthority
       #----------
       - ./donkey_car:/home/ubuntu/donkey_car
     working_dir: /home/ubuntu/donkey_car
