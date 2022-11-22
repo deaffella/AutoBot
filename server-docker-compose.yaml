@@ -22,6 +22,7 @@ services:
       - DISPLAY=$DISPLAY
       - QT_GRAPHICSSYSTEM=native
       - QT_X11_NO_MITSHM=1
+      - _X11_NO_MITSHM=1
     user: ubuntu
     volumes:
       # X11 & Cam
