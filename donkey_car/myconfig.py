@@ -70,8 +70,8 @@ DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
 ### TRAIN MODELS -------------------------------------------------------------------------------------------------------
 SEND_BEST_MODEL_TO_PI = False   #change to true to automatically send best model during training
 CREATE_TF_LITE 	 	  = True    # automatically create tflite model in training
-CREATE_TENSOR_RT 	  = False   # automatically create tensorrt model in training
-# CREATE_TENSOR_RT 	  = True   # automatically create tensorrt model in training
+# CREATE_TENSOR_RT 	  = False   # automatically create tensorrt model in training
+CREATE_TENSOR_RT 	  = True   # automatically create tensorrt model in training
 MAX_EPOCHS 		 	  = 10
 # MAX_EPOCHS 		 	  = 2
 
@@ -86,7 +86,7 @@ ROI_TRAPEZE_MAX_Y 	= IMAGE_H
 
 # DONKEY UI CAR CONNECTOR
 PI_USERNAME = 'nano'
-PI_HOSTNAME = '192.168.2.220'
+PI_HOSTNAME = '192.168.42.220'
 
 
 # ~/deaffy/AutoBot/donkey_car/DYNAMIC_DATA/data

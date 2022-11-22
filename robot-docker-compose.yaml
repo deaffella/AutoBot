@@ -1,0 +1,58 @@
+version: "3.3"
+
+# https://github.com/dusty-nv/jetson-inference/blob/master/docker/run.sh
+
+
+services:
+
+  l4t_jupyter:
+    build:
+      context: .
+      dockerfile: dockerfiles/l4t_cv_tf.Dockerfile
+    container_name: l4t_jupyter
+    image: autobot:l4t_jupyter
+    restart: "always"
+    #network_mode: host
+    #privileged: true
+    tty: true
+    stdin_open: true
+    ports:
+      - 9001:9001
+    #entrypoint: 'bash'
+    #command: 'pwd'
+    volumes:
+      - ./donkey_car:/donkey_car
+    working_dir: /donkey_car
+    entrypoint: 'jupyter-lab --allow-root --ip 0.0.0.0 --port 9001'
+
+
+  donkeycar:
+    depends_on:
+      - l4t_jupyter
+    build:
+      context: .
+      dockerfile: dockerfiles/robot_donkey_car.Dockerfile
+    container_name: donkey_car
+    image: autobot:robot_donkey_car
+    restart: "always"
+    network_mode: host
+    privileged: true
+    tty: true
+    stdin_open: true
+    environment:
+      - DISPLAY=$DISPLAY
+      - WEB_CONTROL_PORT=9002
+    volumes:
+      # X11 & Cam
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /tmp/camsock:/tmp/camsock:rw
+      - /tmp/argus_socket:/tmp/argus_socket:rw
+      - /tmp/nvscsock:/tmp/nvscsock:rw
+      - /etc/enctune.conf:/etc/enctune.conf
+      #- /opt:/opt
+      #----------
+      - ./donkey_car:/donkey_car
+      - /dev:/dev                           # [обязательно] - для проброса USB камеры
+    working_dir: /donkey_car
+    entrypoint: 'bash'
+    #entrypoint: './Autobot_Platform.py'

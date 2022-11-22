@@ -1,0 +1,42 @@
+version: "3.3"
+
+# https://hub.docker.com/r/naisy/donkeycar-pc
+
+
+services:
+
+  server_donkeycar:
+    build:
+      context: .
+      dockerfile: dockerfiles/server_donkey_car.Dockerfile
+    image: autobot:server_donkey_car
+#    image: naisy/donkeycar-pc:overdrive4
+    runtime: nvidia
+    container_name: server_donkeycar
+    restart: "always"
+    network_mode: host
+    privileged: true
+    tty: true
+    stdin_open: true
+    environment:
+      - DISPLAY=$DISPLAY
+      - QT_GRAPHICSSYSTEM=native
+      - QT_X11_NO_MITSHM=1
+    user: ubuntu
+    volumes:
+      # X11 & Cam
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /tmp/camsock:/tmp/camsock:rw
+      - /tmp/argus_socket:/tmp/argus_socket:rw
+      - /tmp/nvscsock:/tmp/nvscsock:rw
+      - /etc/enctune.conf:/etc/enctune.conf
+      - /etc/localtime:/etc/localtime:ro
+      - /dev/:/dev/
+      #- $HOST_USER_XAUTH:$DOCKER_USER_XAUTH
+      - /home/$USER/.Xauthority/:/home/ubuntu/.Xauthority
+      - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
+      #----------
+      - ./donkey_car:/home/ubuntu/donkey_car
+    working_dir: /home/ubuntu/donkey_car
+    entrypoint: 'bash'
+    #entrypoint: './UI_entrypoint.sh'

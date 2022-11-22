@@ -48,14 +48,14 @@ sleep 1
 cd ${project_dir_path}
 
 
-docker-compose -p "${docker_stack_name}" -f robot-docker-compose.yaml down
+docker-compose -p "${docker_stack_name}" -f server-docker-compose.yaml down
 
 #DOCKER_DEFAULT_PLATFORM=${OS_PLATFORM} \
 COMPOSE_DOCKER_CLI_BUILD=1 \
 DOCKER_BUILDKIT=1 \
 HOSTNAME=${HOSTNAME} \
 DISPLAY=${DISPLAY} \
-docker-compose -p "${docker_stack_name}" -f robot-docker-compose.yaml up -d --build
+docker-compose -p "${docker_stack_name}" -f server-docker-compose.yaml up -d --build
 
 
 echo ""
