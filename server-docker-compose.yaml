@@ -22,6 +22,7 @@ services:
       - DISPLAY=$DISPLAY
       - QT_GRAPHICSSYSTEM=native
       - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/tmp/.XAuthority
     user: ubuntu
     volumes:
       # X11 & Cam
@@ -32,7 +33,7 @@ services:
       - /etc/enctune.conf:/etc/enctune.conf
       - /etc/localtime:/etc/localtime:ro
       - /dev/:/dev/
-      #- /home/$USER/.Xauthority/:/home/ubuntu/.Xauthority
+      - /home/$USER/.Xauthority/:/tmp/.XAuthority
       #----------
       - ./donkey_car:/home/ubuntu/donkey_car
     working_dir: /home/ubuntu/donkey_car
