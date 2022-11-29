@@ -132,8 +132,6 @@ class LocalWebController(tornado.web.Application):
             (r"/drive", DriveAPI),
             (r"/wsDrive", WebSocketDriveAPI),
             (r"/wsCalibrate", WebSocketCalibrateAPI),
-            (r"/calibrate", CalibrateHandler),
-            #(r"/video", VideoAPI),
             (r"/video_top", VideoAPI_Top),
             (r"/video_bot", VideoAPI_Bot),
             (r"/wsTest", WsTest),
@@ -255,12 +253,6 @@ class WsTest(RequestHandler):
     def get(self):
         data = {}
         self.render("templates/wsTest.html", **data)
-
-
-class CalibrateHandler(RequestHandler):
-    """ Serves the calibration web page"""
-    async def get(self):
-        await self.render("templates/calibrate.html")
 
 
 def latch_buttons(buttons, pushes):
