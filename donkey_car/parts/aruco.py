@@ -20,7 +20,7 @@ class ArucoSignDetector():
 				 image_size: int = 224,
 				 border_size: int = 1):
 		if len(signs_dict) == 0:
-			signs_dict = {0: 'stop'}
+			signs_dict = {0: {'name':	'stop', 'exec_time': 10}}
 		self.signs = signs_dict
 
 		self.image_size = image_size
@@ -34,7 +34,7 @@ class ArucoSignDetector():
 		assert type(id) is int
 		assert 0 <= id <= 249
 		assert id in self.signs.keys()
-		return self.signs[id]
+		return self.signs[id]['name']
 
 	def get_sign_image_by_id(self, id: int) -> np.ndarray:
 		assert type(id) is int
@@ -45,9 +45,6 @@ class ArucoSignDetector():
 		return markerImage
 
 	def detect(self, frame: np.ndarray):
-		# if self.detector is None:
-		# 	self.detector = cv2.aruco.DetectorParameters_create()
-
 		markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(frame,
 																			   self.dictionary,
 																			   parameters=self.detector_params)
@@ -76,7 +73,7 @@ class ArucoSignDetector():
 
 			# loop over the detected ArUCo corners
 			for (markerCorner, markerID) in zip(corners, ids):
-				sign_name = self.signs[markerID]
+				sign_name = self.signs[markerID]['name']
 
 				# extract the marker corners (which are always returned in
 				# top-left, top-right, bottom-right, and bottom-left order)
@@ -107,12 +104,11 @@ class ArucoSignDetector():
 				#print("[INFO] ArUco marker ID: {}".format(markerID))
 		return frame
 
-	def run(self, frame: np.ndarray) -> (np.ndarray, np.ndarray, np.ndarray):
-		if type(frame) == np.ndarray:
-			markerCorners, markerIds, rejectedCandidates = self.detect(frame=frame)
-
-			frame = self.draw_bboxes(frame=frame, corners=markerCorners, ids=markerIds)
-			return frame, markerCorners, markerIds
+	def run(self, road_frame: np.ndarray, sign_frame: np.ndarray) -> (np.ndarray, np.ndarray, np.ndarray):
+		if type(road_frame) == np.ndarray and type(sign_frame) == np.ndarray:
+			markerCorners, markerIds, rejectedCandidates = self.detect(frame=sign_frame)
+			sign_frame = self.draw_bboxes(frame=sign_frame, corners=markerCorners, ids=markerIds)
+			return road_frame, sign_frame, markerCorners, markerIds
 
 	def shutdown(self):
 		pass
@@ -123,4 +119,4 @@ class ArucoSignDetector():
 if __name__=='__main__':
 
 	aruco = ArucoSignDetector(image_size=500)
-	aruco.save_signs_to_dir()
+	# aruco.save_signs_to_dir()

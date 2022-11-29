@@ -22,8 +22,8 @@ DATA_PATH = os.path.join(DONKEY_CAR_DIR_PATH, 'data')
 MODELS_PATH = os.path.join(DONKEY_CAR_DIR_PATH, 'models')
 
 
-# DRIVE_LOOP_HZ = 20
-DRIVE_LOOP_HZ = 10
+DRIVE_LOOP_HZ = 20
+# DRIVE_LOOP_HZ = 10
 CAMERA_FRAMERATE = 20
 
 
@@ -34,6 +34,9 @@ CAMERA_SENSOR_ID = 0				# in double_cam.py mode specifies camera idx to write fr
 CSIC_CAM_GSTREAMER_FLIP_PARM = 2	# (0 => none , 4 => Flip horizontally, 6 => Flip vertically)
 # IMAGE_W, IMAGE_H = 224, 224		# default
 IMAGE_W, IMAGE_H = 320, 240			# custom
+
+ROAD_CAM, SIGNS_CAM = 'cam_top', 'cam_bot'
+# ROAD_CAM, SIGNS_CAM = 'cam_bot', 'cam_top'
 
 
 ### HW AND CONTROLS ----------------------------------------------------------------------------------------------------
@@ -63,7 +66,7 @@ FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency 
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)
 # pytorch models: (resnet18)
 DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
-# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'home_black_10k.h5'
+# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-11-28_5.tflite'
 # DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'spiiras_red_20k.tflite'
 
 
@@ -92,23 +95,23 @@ PI_HOSTNAME = '192.168.42.220'
 ### ARUCO SIGNS --------------------------------------------------------------------------------------------------------
 ARUCO_SIGNS_SAVE_TO_DIR = True
 ARUCO_SIGNS_DICT = {
-	0: 'stop',
-	1: 'start',
+	0:	{'name':	'stop',         		'exec_time': 10},
+	1:	{'name':	'start',        		'exec_time': 2},
 
-	2: 'cross_left',
-	3: 'cross_forward',
-	4: 'cross_right',
+	2:	{'name':	'cross_left',   		'exec_time': 2.5},
+	3:	{'name':	'cross_forward',		'exec_time': 2.5},
+	4:	{'name':	'cross_right',  		'exec_time': 2.5},
 
-	5: 'speed_down',
-	6: 'speed_up',
+	5:	{'name':	'speed_down',   		'exec_time': 3},
+	6:	{'name':	'speed_up',     		'exec_time': 3},
 
-	7: 'rotate-90',
-	8: 'rotate-180',
-	9: 'rotate-270',
-	10: 'rotate-360',
-
-	11: 'rotate+90',
-	12: 'rotate+180',
-	13: 'rotate+270',
-	14: 'rotate+360',
+	# 7:	{'name':	'rotate-90',    		'exec_time': 1},
+	# 8:	{'name':	'rotate-180',   		'exec_time': 1},
+	# 9:	{'name':	'rotate-270',   		'exec_time': 1},
+	# 10:	{'name':	'rotate-360',  			'exec_time': 1},
+	#
+	# 11:	{'name':	'rotate+90',   			'exec_time': 1},
+	# 12:	{'name':	'rotate+180',  			'exec_time': 1},
+	# 13:	{'name':	'rotate+270',  			'exec_time': 1},
+	# 14:	{'name':	'rotate+360',  			'exec_time': 1},1
 }

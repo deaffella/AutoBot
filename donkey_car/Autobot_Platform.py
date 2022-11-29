@@ -44,7 +44,7 @@ def remove_collected_data(dir_path: str):
 def add_controller(V, cfg):
 	ctr = LocalWebController(port=cfg.WEB_CONTROL_PORT, mode=cfg.WEB_INIT_MODE)
 	V.add(ctr,
-		  inputs=['cam_top/image_array', 'cam_bot/image_array', 'tub/num_records', 'user/mode', 'recording'],
+		  inputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'tub/num_records', 'user/mode', 'recording'],
 		  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording', 'web/buttons'],
 		  threaded=True)
 
@@ -76,8 +76,8 @@ def add_controller(V, cfg):
 				ctr.js = netwkJs
 		V.add(ctr,
 			  # inputs=[input_image, 'user/mode', 'recording'],
-			  # inputs=['cam_top/image_array', 'cam_bot/image_array', 'user/mode', 'recording'],
-			  inputs=['cam_top/image_array', 'user/mode', 'recording'],
+			  # inputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'user/mode', 'recording'],
+			  inputs=[f'{cfg.ROAD_CAM}/image_array', 'user/mode', 'recording'],
 			  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
 			  threaded=True)
 	return ctr
@@ -92,56 +92,104 @@ class PilotCondition:
 
 
 class DriveMode:
-	# def run(self, mode, user_angle, user_throttle, pilot_angle, pilot_throttle):
-	def run(self, mode, user_angle, user_throttle, pilot_angle, pilot_throttle, aruco_angle, aruco_throttle):
+	def run(self,
+			mode,
+			user_angle, user_throttle, pilot_angle,
+			pilot_throttle,
+			aruco_angle, aruco_throttle,
+			):
 		if mode == 'user':
 			return user_angle, user_throttle
+
 		elif mode == 'local_angle':
 			return pilot_angle if pilot_angle else 0.0, user_throttle
-		elif mode == 'aruco_single':
-			# return user_angle, user_throttle
-			return aruco_angle, aruco_throttle
-
-		else:
+		elif mode == 'local':
 			return pilot_angle if pilot_angle else 0.0, \
 				   pilot_throttle * cfg.AI_THROTTLE_MULT \
 					   if pilot_throttle else 0.0
 
+		elif mode == 'aruco_single':
+			if aruco_angle is None or aruco_throttle is None:
+				return 0.0, 0.0
+			return aruco_angle, aruco_throttle
+
+		elif mode == 'local+aruco':
+			if aruco_angle is None or aruco_throttle is None:
+				return pilot_angle if pilot_angle else 0.0, \
+					   pilot_throttle * cfg.AI_THROTTLE_MULT \
+						   if pilot_throttle else 0.0
+			return aruco_angle, aruco_throttle
+
+		else:
+			return 0.0, 0.0
+
 
 class ArucoDriveController(object):
-	angle = 0
-	throttle = 0
 
-	def run(self, markerCorners: np.ndarray, markerIds: np.ndarray) -> (float, float):
-		if type(markerIds) != np.ndarray or type(markerIds) != np.ndarray:
-			return 0, 0
-		ids = markerIds.tolist()
+	def __init__(self, signs_dict: dict):
+		if len(signs_dict) == 0:
+			signs_dict = {0: {'name':	'stop', 'exec_time': 10}}
+		self.signs = signs_dict
 
-		if 0 in ids:
-			# stop
-			angle = 0
-			throttle = 0
-		elif 1 in ids:
-			# start
-			angle = 0
-			throttle = 1
-		elif 2 in ids:
-			# cross_left
-			angle = -0.8
-			throttle = 1
-		elif 4 in ids:
-			# cross_right
-			angle = 0.8
-			throttle = 1
-		else:
-			angle = 0
-			throttle = 0
+		self.angle: float = None
+		self.throttle: float = None
 
-		self.angle = angle
-		self.throttle = throttle
+		self.maneuver_execution_time_sec: float = 0  # время выполнения маневра
+		self.last_sign_detect_time: float = 0
+		self.running: bool = True
+
+		self.logger = logging.getLogger(self.__class__.__name__)
+
+	def update(self):
+		while self.running:
+			this_time = time.time()
+			time_delta = this_time - self.last_sign_detect_time
+			if time_delta >= self.maneuver_execution_time_sec:
+				if self.angle is not None and self.throttle is not None:
+					self.logger.info(f'[done]: {time_delta}')
+				self.angle = None
+				self.throttle = None
+			time.sleep(0.01)
+
+	def run_threaded(self, markerCorners: np.ndarray, markerIds: np.ndarray) -> (float, float):
+		if type(markerIds) == np.ndarray or type(markerIds) == np.ndarray:
+			ids = markerIds.tolist()
+
+			this_time = time.time()
+			if this_time - self.last_sign_detect_time > self.maneuver_execution_time_sec:
+				self.last_sign_detect_time = this_time
+
+				if len(ids) == 1:
+					selected_id = ids[0]
+
+					if selected_id == 0:
+						# stop
+						self.angle = 0
+						self.throttle = 0
+					elif selected_id == 1:
+						# start
+						self.angle = 0
+						self.throttle = 1
+					elif selected_id == 2:
+						# cross_left
+						self.angle = -0.8
+						self.throttle = 1
+					elif selected_id == 3:
+						# cross_forward
+						self.angle = 0
+						self.throttle = 1
+					elif selected_id == 4:
+						# cross_right
+						self.angle = 0.8
+						self.throttle = 1
+
+					self.maneuver_execution_time_sec = self.signs[selected_id]['exec_time']
+					self.logger.info(f'[selected_id]: [{selected_id} - {self.signs[selected_id]["name"]}]')
+
 		return self.angle, self.throttle
 
 	def shutdown(self):
+		self.running = False
 		return 0, 0
 
 
@@ -189,17 +237,14 @@ def dual_cam_drive(cfg,
 								image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
 								capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
 								framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
-	V.add(cam_top, inputs=[], outputs=['cam_top/image_array'], threaded=True)
+	V.add(cam_top, inputs=[], outputs=[f'cam_top/pure_image'], threaded=True)
 
 	# setup bottom camera
 	cam_bot = Jetson_CSI_Camera(sensor_id=1,
 								image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
 								capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
 								framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
-	V.add(cam_bot, inputs=[],
-		  # outputs=['cam_bot/image_array'],
-		  outputs=['cam_bot/pure_image'],
-		  threaded=True)
+	V.add(cam_bot, inputs=[], outputs=[f'cam_bot/pure_image'], threaded=True)
 
 	# fps console counter
 	if cfg.SHOW_FPS:
@@ -211,14 +256,14 @@ def dual_cam_drive(cfg,
 		aruco_sign_detector.save_signs_to_dir()
 
 	V.add(aruco_sign_detector,
-		  inputs=['cam_bot/pure_image'],
-		  outputs=['cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds'],
+		  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
+		  outputs=[f'cam_top/image_array', f'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds'],
 		  threaded=False)
 
-	V.add(ArucoDriveController(),
+	V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
 		  inputs=['aruco/markerCorners', 'aruco/markerIds'],
 		  outputs=['aruco/angle', 'aruco/throttle'],
-		  threaded=False)
+		  threaded=True)
 
 	# add the user input controller(s)
 	# - this will add the web controller
@@ -388,15 +433,11 @@ def dual_cam_drive(cfg,
 				ctr.set_button_down_trigger('L1', bh.increment_state)
 			except:
 				pass
-
-			# inputs = ['cam/image_array', "behavior/one_hot_state_array"]
-			inputs = ['cam_top/image_array', "behavior/one_hot_state_array"]
-
+			inputs = [f'{cfg.ROAD_CAM}/image_array', "behavior/one_hot_state_array"]
 		else:
-			inputs = ['cam_top/image_array']
+			inputs = [f'{cfg.ROAD_CAM}/image_array']
 
 		# collect model inference outputs
-		#
 		outputs = ['pilot/angle', 'pilot/throttle']
 
 		if cfg.TRAIN_LOCALIZER:
@@ -408,9 +449,10 @@ def dual_cam_drive(cfg,
 			from donkeycar.pipeline.augmentations import ImageAugmentation
 			# V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'), inputs=['cam/image_array'], outputs=['cam/image_array_trans'])
 			# inputs = ['cam/image_array_trans'] + inputs[1:]
-			V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'), inputs=['cam_top/image_array'],
-				  outputs=['cam_top/image_array_trans'])
-			inputs = ['cam_top/image_array_trans'] + inputs[1:]
+			V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'),
+				  inputs=[f'{cfg.ROAD_CAM}/image_array'],
+				  outputs=[f'{cfg.ROAD_CAM}/image_array_trans'])
+			inputs = [f'{cfg.ROAD_CAM}/image_array_trans'] + inputs[1:]
 		V.add(kl, inputs=inputs, outputs=outputs, run_condition='run_pilot')
 
 	# # stop at a stop sign
@@ -423,7 +465,7 @@ def dual_cam_drive(cfg,
 	# 						   cfg.STOP_SIGN_MAX_REVERSE_COUNT,
 	# 						   cfg.STOP_SIGN_REVERSE_THROTTLE),
 	# 		  # inputs=['cam/image_array', 'pilot/throttle'], outputs=['pilot/throttle', 'cam/image_array'])
-	# 		  inputs=['cam_top/image_array', 'pilot/throttle'], outputs=['pilot/throttle', 'cam_top/image_array'])
+	# 		  inputs=[f'{cfg.ROAD_CAM}/image_array', 'pilot/throttle'], outputs=['pilot/throttle', f'{cfg.ROAD_CAM}/image_array'])
 	# 	V.add(ThrottleFilter(),
 	# 		  inputs=['pilot/throttle'], outputs=['pilot/throttle'])
 
@@ -439,8 +481,10 @@ def dual_cam_drive(cfg,
 
 	# Choose what inputs should change the car.
 	# V.add(DriveMode(), inputs=['user/mode', 'user/angle', 'user/throttle', 'pilot/angle', 'pilot/throttle'], outputs=['angle', 'throttle'])
-	V.add(DriveMode(), inputs=['user/mode', 'user/angle', 'user/throttle', 'pilot/angle', 'pilot/throttle',
-							   'aruco/angle', 'aruco/throttle'], outputs=['angle', 'throttle'])
+	V.add(DriveMode(), inputs=['user/mode', 'user/angle', 'user/throttle',
+							   'pilot/angle', 'pilot/throttle',
+							   'aruco/angle', 'aruco/throttle',
+							   ], outputs=['angle', 'throttle'])
 
 	if isinstance(ctr, JoystickController):
 		ctr.set_button_down_trigger(cfg.AI_LAUNCH_ENABLE_BUTTON, aiLauncher.enable_ai_launch)
@@ -495,7 +539,7 @@ def dual_cam_drive(cfg,
 		V.add(mon, inputs=[], outputs=perfmon_outputs, threaded=True)
 
 	if cfg.ENABLE_AUTOBOT_TELEMETRY:
-		V.add(Sensor_RFID(), inputs=[], outputs=['telemetry/rfid'], threaded=False)
+		#V.add(Sensor_RFID(), inputs=[], outputs=['telemetry/rfid'], threaded=False)
 		# inputs += ['telemetry/rfid']
 		# types += ['str']
 
@@ -522,13 +566,11 @@ def dual_cam_drive(cfg,
 		current_tub_path = TubHandler(path=cfg.DATA_PATH).create_tub_path()
 	meta += getattr(cfg, 'METADATA', [])
 
-	cam_top_tub_writer = TubWriter(f'{current_tub_path}', inputs=inputs + ['cam/image_array', ],
+	cam_top_tub_writer = TubWriter(f'{current_tub_path}',
+								   inputs=inputs + ['cam/image_array', ],
 								   types=types + ['image_array', ], metadata=meta)
-	V.add(cam_top_tub_writer, inputs=inputs + ['cam_top/image_array'], outputs=["tub/num_records"],
+	V.add(cam_top_tub_writer, inputs=inputs + [f'{cfg.ROAD_CAM}/image_array'], outputs=["tub/num_records"],
 		  run_condition='recording')
-
-	# cam_bot_tub_writer = TubWriter(f'{current_tub_path}/cam_bot', inputs=inputs + ['cam/image_array', ], types=types + ['image_array', ], metadata=meta)
-	# V.add(cam_bot_tub_writer, inputs=inputs + ['cam_bot/image_array'], outputs=["tub/num_records"], run_condition='recording')
 
 	print(f"{'-' * 20}\n{'-' * 20}\n{'-' * 20}\n")
 	print(f"You can now go to:\n\n<your hostname.local>:{cfg.WEB_CONTROL_PORT}\nto drive your car.\n")
@@ -544,7 +586,7 @@ def dual_cam_drive(cfg,
 
 
 if __name__ == '__main__':
-	logger = logging.getLogger(__name__)
+	logger = logging.getLogger(__file__)
 	logging.basicConfig(level=logging.INFO)
 
 	cfg = dk.load_config(myconfig='myconfig.py', config_path='config.py')
