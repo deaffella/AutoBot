@@ -161,16 +161,16 @@ class ArucoDriveController(object):
 					 markerIds: np.ndarray,
 					 distances: list) -> (float, float):
 		if type(markerIds) == np.ndarray and type(markerIds) == np.ndarray and type(distances) == list:
-			markerIds = markerIds.flatten()
-			ids = markerIds.tolist()
+			# ids = markerIds.tolist()
 
 			this_time = time.time()
 			if this_time - self.last_sign_detect_time > self.maneuver_execution_time_sec:
 				self.last_sign_detect_time = this_time
 
-				if len(ids):
-					selected_id = ids[0]
+				if len(markerIds):
+					selected_id = markerIds[0]
 					if selected_id != self.last_detected_sign_id:
+						# self.last_detected_sign_id = selected_id
 						current_dist_to_marker = distances[0]
 						min_dist_to_marker = self.signs[selected_id]['distance_to_marker']
 						if current_dist_to_marker <= min_dist_to_marker:
