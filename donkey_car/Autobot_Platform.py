@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
 import shutil
@@ -23,8 +24,10 @@ from donkeycar.parts.tub_v2 import TubWriter
 
 from donkeycar.parts.actuator import TwoWheelSteeringThrottle
 
+# from donkeycar.parts.cv import CvCam
+
 # from manage import add_drivetrain
-from parts.cameras import Jetson_CSI_Camera
+from parts.cameras import Jetson_CSI_Camera, CV_USB_Camera
 from parts.web_controller.web import LocalWebController
 
 from parts.actuators import autobot_platform
@@ -128,8 +131,10 @@ class ArucoDriveController(object):
 
 	def __init__(self, signs_dict: dict):
 		if len(signs_dict) == 0:
-			signs_dict = {0: {'name':	'stop', 'exec_time': 10}}
+			signs_dict = {0: {'name':	'stop', 'exec_time': 10, 'distance_to_marker': 300}}
 		self.signs = signs_dict
+
+		self.last_detected_sign_id = None
 
 		self.angle: float = None
 		self.throttle: float = None
@@ -151,40 +156,47 @@ class ArucoDriveController(object):
 				self.throttle = None
 			time.sleep(0.01)
 
-	def run_threaded(self, markerCorners: np.ndarray, markerIds: np.ndarray) -> (float, float):
-		if type(markerIds) == np.ndarray or type(markerIds) == np.ndarray:
+	def run_threaded(self,
+					 markerCorners: np.ndarray,
+					 markerIds: np.ndarray,
+					 distances: list) -> (float, float):
+		if type(markerIds) == np.ndarray and type(markerIds) == np.ndarray and type(distances) == list:
+			markerIds = markerIds.flatten()
 			ids = markerIds.tolist()
 
 			this_time = time.time()
 			if this_time - self.last_sign_detect_time > self.maneuver_execution_time_sec:
 				self.last_sign_detect_time = this_time
 
-				if len(ids) == 1:
+				if len(ids):
 					selected_id = ids[0]
+					if selected_id != self.last_detected_sign_id:
+						current_dist_to_marker = distances[0]
+						min_dist_to_marker = self.signs[selected_id]['distance_to_marker']
+						if current_dist_to_marker <= min_dist_to_marker:
+							if selected_id == 0:
+								# stop
+								self.angle = 0
+								self.throttle = 0
+							elif selected_id == 1:
+								# start
+								self.angle = 0
+								self.throttle = 1
+							elif selected_id == 2:
+								# cross_left
+								self.angle = -0.8
+								self.throttle = 1
+							elif selected_id == 3:
+								# cross_forward
+								self.angle = 0
+								self.throttle = 1
+							elif selected_id == 4:
+								# cross_right
+								self.angle = 0.8
+								self.throttle = 1
 
-					if selected_id == 0:
-						# stop
-						self.angle = 0
-						self.throttle = 0
-					elif selected_id == 1:
-						# start
-						self.angle = 0
-						self.throttle = 1
-					elif selected_id == 2:
-						# cross_left
-						self.angle = -0.8
-						self.throttle = 1
-					elif selected_id == 3:
-						# cross_forward
-						self.angle = 0
-						self.throttle = 1
-					elif selected_id == 4:
-						# cross_right
-						self.angle = 0.8
-						self.throttle = 1
-
-					self.maneuver_execution_time_sec = self.signs[selected_id]['exec_time']
-					self.logger.info(f'[selected_id]: [{selected_id} - {self.signs[selected_id]["name"]}]')
+						self.maneuver_execution_time_sec = self.signs[selected_id]['exec_time']
+						self.logger.info(f'[selected_id]: [{selected_id} - {self.signs[selected_id]["name"]}]')
 
 		return self.angle, self.throttle
 
@@ -234,34 +246,42 @@ def dual_cam_drive(cfg,
 
 	# setup top camera
 	cam_top = Jetson_CSI_Camera(sensor_id=0,
-								image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
+								image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H,
 								capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
 								framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
 	V.add(cam_top, inputs=[], outputs=[f'cam_top/pure_image'], threaded=True)
 
 	# setup bottom camera
-	cam_bot = Jetson_CSI_Camera(sensor_id=1,
-								image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH,
-								capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
-								framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
+	# cam_bot = Jetson_CSI_Camera(sensor_id=1,
+	# 							image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H,
+	# 							capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H,
+	# 							framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
+	# cam_bot = CV_Webcam(cam_path='/dev/cams/usb',
+	# cam_bot = CV_Webcam(cam_path='/dev/video1')
+	# cam_bot = CvCam(iCam='/dev/video1', image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H)
+	cam_bot = CV_USB_Camera(camera_path='/dev/video1', capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H)
 	V.add(cam_bot, inputs=[], outputs=[f'cam_bot/pure_image'], threaded=True)
+
+	time.sleep(0.4)
 
 	# fps console counter
 	if cfg.SHOW_FPS:
 		from donkeycar.parts.fps import FrequencyLogger
 		V.add(FrequencyLogger(cfg.FPS_DEBUG_INTERVAL), outputs=["fps/current", "fps/fps_list"])
 
-	aruco_sign_detector = ArucoSignDetector(signs_dict=cfg.ARUCO_SIGNS_DICT)
+	aruco_sign_detector = ArucoSignDetector(signs_dict=cfg.ARUCO_SIGNS_DICT,
+											calib_data_path=cfg.ARUCO_CAMERA_CALIB_DATA_PATH,
+											marker_size_mm=cfg.ARUCO_SIGN_SIZE_MM)
 	if cfg.ARUCO_SIGNS_SAVE_TO_DIR:
 		aruco_sign_detector.save_signs_to_dir()
 
 	V.add(aruco_sign_detector,
 		  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
-		  outputs=[f'cam_top/image_array', f'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds'],
+		  outputs=[f'cam_top/image_array', 'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
 		  threaded=False)
 
 	V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
-		  inputs=['aruco/markerCorners', 'aruco/markerIds'],
+		  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
 		  outputs=['aruco/angle', 'aruco/throttle'],
 		  threaded=True)
 

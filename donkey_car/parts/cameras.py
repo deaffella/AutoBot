@@ -13,6 +13,8 @@ import threading
 import numpy as np
 import random
 
+from donkeycar.parts.cv import CvCam
+
 
 class Jetson_CSI_Camera(object):
     def __init__(self,
@@ -22,8 +24,7 @@ class Jetson_CSI_Camera(object):
                  framerate: int = 60,
                  gstreamer_flip: int = 2,
                  image_w: int = None,
-                 image_h: int = None,
-                 image_d: int = 3):
+                 image_h: int = None):
         self.sensor_id = sensor_id
         self.capture_width = capture_width
         self.capture_height = capture_height
@@ -60,26 +61,20 @@ class Jetson_CSI_Camera(object):
                                        flip_method:       int = 0,
                                        ) -> str:
         """
-    construct_gstreamer_pipeline returns a GStreamer pipeline for capturing from the CSI camera
-    Flip the image by setting the flip_method (most common values: 0 and 2)
-    display_width and display_height determine the size of each camera pane in the window on the screen
-    Default 1920x1080
+        construct_gstreamer_pipeline returns a GStreamer pipeline for capturing from the CSI camera
+        Flip the image by setting the flip_method (most common values: 0 and 2)
+        display_width and display_height determine the size of each camera pane in the window on the screen
+        Default 1920x1080
 
-    :param sensor_id:
-    :param capture_width:
-    :param capture_height:
-    :param display_width:
-    :param display_height:
-    :param framerate:
-    :param flip_method:
-    :return:
+        :param sensor_id:
+        :param capture_width:
+        :param capture_height:
+        :param display_width:
+        :param display_height:
+        :param framerate:
+        :param flip_method:
+        :return:
         """
-        # return f"nvarguscamerasrc sensor-id={sensor_id} ! " \
-        #        f"video/x-raw(memory:NVMM), width=(int){capture_width}, height=(int){capture_height}, framerate=(fraction){framerate}/1 ! " \
-        #        f"nvvidconv flip-method={flip_method} ! " \
-        #        f"video/x-raw, width=(int){display_width}, height=(int){display_height}, format=(string)BGRx ! " \
-        #        f"videoconvert ! " \
-        #        f"video/x-raw, format=(string)BGR ! appsink"
         return f"nvarguscamerasrc sensor-id={sensor_id} ! " \
                f"video/x-raw(memory:NVMM), width=(int){capture_width}, height=(int){capture_height}, " \
                f"format=(string)NV12, " \
@@ -135,7 +130,25 @@ class Jetson_CSI_Camera(object):
             self.read_frame_from_device()
 
 
-class Cv_Image_Display(object):
+class CV_USB_Camera(CvCam):
+    def __init__(self,
+                 camera_path:    str = '/dev/cams/usb',
+                 capture_width:  int = 640,
+                 capture_height: int = 480,
+                 ):
+        super().__init__(iCam=camera_path,
+                         image_w=capture_width,
+                         image_h=capture_height,
+                         image_d=3)
+
+    def poll(self):
+        if self.cap.isOpened():
+            ret, frame = self.cap.read()
+            if frame is not None:
+                self.frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+
+class CV_Image_Display(object):
     def __init__(self,
                  window_name: str = 'frame'):
         self.window_name = window_name
@@ -156,13 +169,14 @@ if __name__=='__main__':
 
     robot = dk.Vehicle()
 
-    main_cam = Jetson_CSI_Camera(sensor_id=1, framerate=30)
+    # main_cam = Jetson_CSI_Camera(sensor_id=0, framerate=30)
+    main_cam = CV_USB_Camera(camera_path='/dev/cams/usb')
     # time.sleep(1)
 
 
     robot.add(main_cam, outputs=['camera/main_cam'], threaded=True)
 
-    display = Cv_Image_Display()
+    display = CV_Image_Display()
     robot.add(display, inputs=['camera/main_cam'])
 
     robot.start(rate_hz=20)

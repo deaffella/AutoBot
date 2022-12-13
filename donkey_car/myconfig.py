@@ -66,7 +66,10 @@ FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency 
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)
 # pytorch models: (resnet18)
 DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
-# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-11-28_5.tflite'
+#DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-11-28_5.tflite'
+
+# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-12_7.tflite'
+
 # DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'spiiras_red_20k.tflite'
 
 
@@ -93,25 +96,28 @@ PI_HOSTNAME = '192.168.42.220'
 # ~/deaffy/AutoBot/donkey_car
 
 ### ARUCO SIGNS --------------------------------------------------------------------------------------------------------
+ARUCO_SIGN_SIZE_MM = 32.0
+ARUCO_CAMERA_CALIB_DATA_PATH = './camera_calibartion/calib_data/MultiMatrix.npz'
+
 ARUCO_SIGNS_SAVE_TO_DIR = True
 ARUCO_SIGNS_DICT = {
-	0:	{'name':	'stop',         		'exec_time': 10},
-	1:	{'name':	'start',        		'exec_time': 2},
+	0:	{'name':	'stop',         		'exec_time': 10,	'distance_to_marker': 900},
+	1:	{'name':	'start',        		'exec_time': 2,		'distance_to_marker': 900},
 
-	2:	{'name':	'cross_left',   		'exec_time': 2.5},
-	3:	{'name':	'cross_forward',		'exec_time': 2.5},
-	4:	{'name':	'cross_right',  		'exec_time': 2.5},
+	2:	{'name':	'cross_left',   		'exec_time': 2.5,	'distance_to_marker': 900},
+	3:	{'name':	'cross_forward',		'exec_time': 2.5,	'distance_to_marker': 900},
+	4:	{'name':	'cross_right',  		'exec_time': 2.5,	'distance_to_marker': 900},
 
-	5:	{'name':	'speed_down',   		'exec_time': 3},
-	6:	{'name':	'speed_up',     		'exec_time': 3},
+	5:	{'name':	'speed_down',   		'exec_time': 3,		'distance_to_marker': 900},
+	6:	{'name':	'speed_up',     		'exec_time': 3,		'distance_to_marker': 900},
 
-	# 7:	{'name':	'rotate-90',    		'exec_time': 1},
-	# 8:	{'name':	'rotate-180',   		'exec_time': 1},
-	# 9:	{'name':	'rotate-270',   		'exec_time': 1},
-	# 10:	{'name':	'rotate-360',  			'exec_time': 1},
+	# 7:	{'name':	'rotate-90',    		'exec_time': 1		'distance_to marker': 300},
+	# 8:	{'name':	'rotate-180',   		'exec_time': 1		'distance_to marker': 300},
+	# 9:	{'name':	'rotate-270',   		'exec_time': 1		'distance_to marker': 300},
+	# 10:	{'name':	'rotate-360',  			'exec_time': 1		'distance_to marker': 300},
 	#
-	# 11:	{'name':	'rotate+90',   			'exec_time': 1},
-	# 12:	{'name':	'rotate+180',  			'exec_time': 1},
-	# 13:	{'name':	'rotate+270',  			'exec_time': 1},
-	# 14:	{'name':	'rotate+360',  			'exec_time': 1},1
+	# 11:	{'name':	'rotate+90',   			'exec_time': 1		'distance_to marker': 300},
+	# 12:	{'name':	'rotate+180',  			'exec_time': 1		'distance_to marker': 300},
+	# 13:	{'name':	'rotate+270',  			'exec_time': 1		'distance_to marker': 300},
+	# 14:	{'name':	'rotate+360',  			'exec_time': 1		'distance_to marker': 300},
 }
