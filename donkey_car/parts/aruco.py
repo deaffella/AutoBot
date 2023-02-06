@@ -25,7 +25,6 @@ class ArucoSignDetector():
                  image_size: int = 224,
                  border_size: int = 1):
         self.marker_size_mm  = marker_size_mm
-        # self.calib_data_path = calib_data_path
         self.calib_data_path = os.path.abspath(calib_data_path)
         self.calib_data		 = self.load_calib_data()
 
