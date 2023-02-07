@@ -583,4 +583,5 @@ if __name__ == '__main__':
 	V = dual_cam_drive(cfg=cfg,
 					   model_path=f'{cfg.MODELS_PATH}/{cfg.MODEL}' if type(cfg.MODEL) != type(None) else None,
 					   model_type=cfg.DEFAULT_MODEL_TYPE)
-	V.start(rate_hz=cfg.CAMERA_FRAMERATE)
+	# V.start(rate_hz=cfg.CAMERA_FRAMERATE)
+	V.start(rate_hz=10)
