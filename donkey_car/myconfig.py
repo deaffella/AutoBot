@@ -35,7 +35,7 @@ CSIC_CAM_GSTREAMER_FLIP_PARM = 2	# (0 => none , 4 => Flip horizontally, 6 => Fli
 # IMAGE_W, IMAGE_H = 224, 224		# default
 IMAGE_W, IMAGE_H = 320, 240			# custom
 
-ROAD_CAM, SIGNS_CAM = 'camera_top', 'cam_bot'
+ROAD_CAM, SIGNS_CAM = 'cam_top', 'cam_bot'
 # ROAD_CAM, SIGNS_CAM = 'cam_bot', 'cam_top'
 
 

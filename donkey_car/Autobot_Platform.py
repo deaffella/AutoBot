@@ -267,16 +267,16 @@ def dual_cam_drive(cfg,
 	if cfg.ARUCO_SIGNS_SAVE_TO_DIR:
 		aruco_sign_detector.save_signs_to_dir()
 
-	# ARUCO SIGNS BOTTOM DETECTION
-	V.add(aruco_sign_detector,
-		  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
-		  outputs=[f'cam_top/image_array', 'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
-		  threaded=False)
-
-	V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
-		  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
-		  outputs=['aruco/angle', 'aruco/throttle'],
-		  threaded=True)
+	# # ARUCO SIGNS BOTTOM DETECTION
+	# V.add(aruco_sign_detector,
+	# 	  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
+	# 	  outputs=[f'cam_top/image_array', 'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+	# 	  threaded=False)
+	#
+	# V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
+	# 	  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+	# 	  outputs=['aruco/angle', 'aruco/throttle'],
+	# 	  threaded=True)
 
 	# ARUCO SIGNS TOP DETECTION
 	# V.add(aruco_sign_detector,
@@ -285,15 +285,15 @@ def dual_cam_drive(cfg,
 	# 	  threaded=False)
 
 
-	# V.add(aruco_sign_detector,
-	# 	  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
-	# 	  outputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
-	# 	  threaded=False)
-	#
-	# V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
-	# 	  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
-	# 	  outputs=['aruco/angle', 'aruco/throttle'],
-	# 	  threaded=True)
+	V.add(aruco_sign_detector,
+		  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
+		  outputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+		  threaded=False)
+
+	V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
+		  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+		  outputs=['aruco/angle', 'aruco/throttle'],
+		  threaded=True)
 
 
 	# add the user input controller(s)
