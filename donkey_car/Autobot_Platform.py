@@ -47,7 +47,7 @@ def remove_collected_data(dir_path: str):
 def add_controller(V, cfg):
 	ctr = LocalWebController(port=cfg.WEB_CONTROL_PORT, mode=cfg.WEB_INIT_MODE)
 	V.add(ctr,
-		  inputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'tub/num_records', 'user/mode', 'recording'],
+		  inputs=[f'cam_top/image_array', f'cam_bot/image_array', 'tub/num_records', 'user/mode', 'recording'],
 		  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording', 'web/buttons'],
 		  threaded=True)
 
@@ -78,8 +78,6 @@ def add_controller(V, cfg):
 				V.add(netwkJs, threaded=True)
 				ctr.js = netwkJs
 		V.add(ctr,
-			  # inputs=[input_image, 'user/mode', 'recording'],
-			  # inputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'user/mode', 'recording'],
 			  inputs=[f'{cfg.ROAD_CAM}/image_array', 'user/mode', 'recording'],
 			  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
 			  threaded=True)
@@ -252,7 +250,6 @@ def dual_cam_drive(cfg,
 	V.add(cam_top, inputs=[], outputs=[f'cam_top/pure_image'], threaded=True)
 
 	# setup bottom camera
-	# cam_bot = CV_USB_Camera(camera_path='/dev/video1', capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H)
 	cam_bot = CV_USB_Camera(camera_path='/dev/cams/usb', capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H)
 	V.add(cam_bot, inputs=[], outputs=[f'cam_bot/pure_image'], threaded=True)
 
@@ -270,16 +267,16 @@ def dual_cam_drive(cfg,
 	if cfg.ARUCO_SIGNS_SAVE_TO_DIR:
 		aruco_sign_detector.save_signs_to_dir()
 
-	# # ARUCO SIGNS BOTTOM DETECTION
-	# V.add(aruco_sign_detector,
-	# 	  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
-	# 	  outputs=[f'cam_top/image_array', 'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
-	# 	  threaded=False)
-	#
-	# V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
-	# 	  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
-	# 	  outputs=['aruco/angle', 'aruco/throttle'],
-	# 	  threaded=True)
+	# ARUCO SIGNS BOTTOM DETECTION
+	V.add(aruco_sign_detector,
+		  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
+		  outputs=[f'cam_top/image_array', 'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+		  threaded=False)
+
+	V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
+		  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+		  outputs=['aruco/angle', 'aruco/throttle'],
+		  threaded=True)
 
 	# ARUCO SIGNS TOP DETECTION
 	# V.add(aruco_sign_detector,
@@ -288,15 +285,15 @@ def dual_cam_drive(cfg,
 	# 	  threaded=False)
 
 
-	V.add(aruco_sign_detector,
-		  inputs=[f'cam_top/pure_image', f'cam_bot/pure_image'],
-		  outputs=[f'cam_top/image_array', 'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
-		  threaded=False)
-
-	V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
-		  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
-		  outputs=['aruco/angle', 'aruco/throttle'],
-		  threaded=True)
+	# V.add(aruco_sign_detector,
+	# 	  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
+	# 	  outputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+	# 	  threaded=False)
+	#
+	# V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
+	# 	  inputs=['aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+	# 	  outputs=['aruco/angle', 'aruco/throttle'],
+	# 	  threaded=True)
 
 
 	# add the user input controller(s)
@@ -314,7 +311,6 @@ def dual_cam_drive(cfg,
 		  run_condition="web/remove_data_last_100")
 	V.add(Lambda(lambda v: print('`Delete all` not implemented yet')), inputs=["web/remove_data_all"],
 		  run_condition="web/remove_data_all")
-	# V.add(Lambda(lambda v: remove_collected_data(cfg.DATA_PATH)), inputs=["web/remove_data_all"],	run_condition="web/remove_data_all")
 
 	V.add(Lambda(lambda v: control_flashlight.run(0)), inputs=["web/fl_off"], run_condition="web/fl_off")
 	V.add(Lambda(lambda v: control_flashlight.run(100)), inputs=["web/fl_on"], run_condition="web/fl_on")
@@ -474,11 +470,8 @@ def dual_cam_drive(cfg,
 		# collect model inference outputs
 		outputs = ['pilot/angle', 'pilot/throttle']
 
-		if cfg.TRAIN_LOCALIZER:
-			outputs.append("pilot/loc")
 
 		# Add image transformations like crop or trapezoidal mask
-		#
 		if hasattr(cfg, 'TRANSFORMATIONS') and cfg.TRANSFORMATIONS:
 			from donkeycar.pipeline.augmentations import ImageAugmentation
 			# V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'), inputs=['cam/image_array'], outputs=['cam/image_array_trans'])
@@ -489,25 +482,6 @@ def dual_cam_drive(cfg,
 			inputs = [f'{cfg.ROAD_CAM}/image_array_trans'] + inputs[1:]
 		V.add(kl, inputs=inputs, outputs=outputs, run_condition='run_pilot')
 
-	# # stop at a stop sign
-	# #
-	# if cfg.STOP_SIGN_DETECTOR:
-	# 	from donkeycar.parts.object_detector.stop_sign_detector \
-	# 		import StopSignDetector
-	# 	V.add(StopSignDetector(cfg.STOP_SIGN_MIN_SCORE,
-	# 						   cfg.STOP_SIGN_SHOW_BOUNDING_BOX,
-	# 						   cfg.STOP_SIGN_MAX_REVERSE_COUNT,
-	# 						   cfg.STOP_SIGN_REVERSE_THROTTLE),
-	# 		  # inputs=['cam/image_array', 'pilot/throttle'], outputs=['pilot/throttle', 'cam/image_array'])
-	# 		  inputs=[f'{cfg.ROAD_CAM}/image_array', 'pilot/throttle'], outputs=['pilot/throttle', f'{cfg.ROAD_CAM}/image_array'])
-	# 	V.add(ThrottleFilter(),
-	# 		  inputs=['pilot/throttle'], outputs=['pilot/throttle'])
-
-	# to give the car a boost when starting ai mode in a race.
-	# This will also override the stop sign detector so that
-	# you can start at a stop sign using launch mode, but
-	# will stop when it comes to the stop sign the next time.
-	#
 	# NOTE: when launch throttle is in effect, pilot speed is set to None
 	#
 	aiLauncher = AiLaunch(cfg.AI_LAUNCH_DURATION, cfg.AI_LAUNCH_THROTTLE, cfg.AI_LAUNCH_KEEP_ENABLED)
@@ -535,20 +509,6 @@ def dual_cam_drive(cfg,
 
 	V.add(AiRunCondition(), inputs=['user/mode'], outputs=['ai_running'])
 
-	# Ai Recording
-	class AiRecordingCondition:
-		'''
-		return True when ai mode, otherwize respect user mode recording flag
-		'''
-
-		def run(self, mode, recording):
-			if mode == 'user':
-				return recording
-			return True
-
-	if cfg.RECORD_DURING_AI:
-		V.add(AiRecordingCondition(), inputs=['user/mode', 'recording'], outputs=['recording'])
-
 	# add_drivetrain(V, cfg)
 	V.add(TwoWheelSteeringThrottle(), inputs=['throttle', 'angle'], outputs=['left/throttle', 'right/throttle'])
 
@@ -559,18 +519,6 @@ def dual_cam_drive(cfg,
 	if cfg.TRAIN_BEHAVIORS:
 		inputs += ['behavior/state', 'behavior/label', "behavior/one_hot_state_array"]
 		types += ['int', 'str', 'vector']
-
-	if cfg.RECORD_DURING_AI:
-		inputs += ['pilot/angle', 'pilot/throttle']
-		types += ['float', 'float']
-
-	if cfg.HAVE_PERFMON:
-		from donkeycar.parts.perfmon import PerfMonitor
-		mon = PerfMonitor(cfg)
-		perfmon_outputs = ['perf/cpu', 'perf/mem', 'perf/freq']
-		inputs += perfmon_outputs
-		types += ['float', 'float', 'float']
-		V.add(mon, inputs=[], outputs=perfmon_outputs, threaded=True)
 
 	if cfg.ENABLE_AUTOBOT_TELEMETRY:
 		#V.add(Sensor_RFID(), inputs=[], outputs=['telemetry/rfid'], threaded=False)

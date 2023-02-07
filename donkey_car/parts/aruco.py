@@ -100,11 +100,20 @@ class ArucoSignDetector():
                 cv2.line(frame, tuple(bottom_left), tuple(top_left), (0, 255, 0), 2)
 
                 cv2.putText(frame,
-                            f"{sign_name} [{round(distance, 2)}]",
+                            f"{sign_name}",
                             tuple(bbox[0]),
                             cv2.FONT_HERSHEY_PLAIN,
                             1.3,
                             (0, 255, 0),
+                            1,
+                            cv2.LINE_AA)
+
+                cv2.putText(frame,
+                            f"[{round(distance, 2)}]",
+                            (top_right[0], top_right[1] + 18),
+                            cv2.FONT_HERSHEY_PLAIN,
+                            1.3,
+                            (255, 0, 0),
                             1,
                             cv2.LINE_AA)
         return frame
@@ -127,6 +136,9 @@ class ArucoSignDetector():
             sign_names, bboxes, distances = self.estimate_pose(marker_corners=marker_corners, markerIds=markerIds)
             sign_frame = self.draw(frame=sign_frame, sign_names=sign_names, bboxes=marker_corners, distances=distances)
             return road_frame, sign_frame, marker_corners, markerIds, distances
+        else:
+            print('!!!!!')
+            print(type(road_frame), type(sign_frame))
 
     def shutdown(self):
         pass

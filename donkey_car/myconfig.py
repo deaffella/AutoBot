@@ -35,7 +35,7 @@ CSIC_CAM_GSTREAMER_FLIP_PARM = 2	# (0 => none , 4 => Flip horizontally, 6 => Fli
 # IMAGE_W, IMAGE_H = 224, 224		# default
 IMAGE_W, IMAGE_H = 320, 240			# custom
 
-ROAD_CAM, SIGNS_CAM = 'cam_top', 'cam_bot'
+ROAD_CAM, SIGNS_CAM = 'camera_top', 'cam_bot'
 # ROAD_CAM, SIGNS_CAM = 'cam_bot', 'cam_top'
 
 
@@ -65,10 +65,10 @@ FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency 
 ### AUTOPILOT MODELS ---------------------------------------------------------------------------------------------------
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)
 # pytorch models: (resnet18)
-# DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
+DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
 #DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-13_8.tflite'
 
-DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-14_9.tflite'
+# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-14_9.tflite'
 # DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-14_10.tflite'
 # DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_23-02-06_13.tflite'
 
