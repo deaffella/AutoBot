@@ -65,12 +65,12 @@ FPS_DEBUG_INTERVAL = 10    # the interval in seconds for printing the frequency 
 ### AUTOPILOT MODELS ---------------------------------------------------------------------------------------------------
 # tensorflow models: (linear | categorical | tflite_linear | tensorrt_linear)
 # pytorch models: (resnet18)
-DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
-#DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-13_8.tflite'
+# DEFAULT_MODEL_TYPE, MODEL = None, None	# Don't use autopilot
+# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-13_8.tflite'
 
 # DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-14_9.tflite'
 # DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_22-12-14_10.tflite'
-# DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_23-02-06_13.tflite'
+DEFAULT_MODEL_TYPE, MODEL = 'tflite_linear', 'pilot_23-02-07_15.tflite'
 
 
 ### TRAIN MODELS -------------------------------------------------------------------------------------------------------
@@ -96,17 +96,18 @@ PI_HOSTNAME = '192.168.42.220'
 # ~/deaffy/AutoBot/donkey_car
 
 ### ARUCO SIGNS --------------------------------------------------------------------------------------------------------
-ARUCO_SIGN_SIZE_MM = 38/2
+# ARUCO_SIGN_SIZE_MM = 38/2
+ARUCO_SIGN_SIZE_MM = 80/2.3
 ARUCO_CAMERA_CALIB_DATA_PATH = './camera_calibartion/calib_data/MultiMatrix.npz'
 
 ARUCO_SIGNS_SAVE_TO_DIR = True
 ARUCO_SIGNS_DICT = {
-	0:	{'name':	'stop',         		'exec_time': 2,		'distance_to_marker': 500},
-	1:	{'name':	'start',        		'exec_time': 2,		'distance_to_marker': 500},
+	0:	{'name':	'stop',         		'exec_time': 2,		'distance_to_marker': 600},
+	1:	{'name':	'start',        		'exec_time': 2,		'distance_to_marker': 600},
 
-	2:	{'name':	'cross_left',   		'exec_time': 2.5,	'distance_to_marker': 700},
+	2:	{'name':	'cross_left',   		'exec_time': 2.5,	'distance_to_marker': 300},
 	3:	{'name':	'cross_forward',		'exec_time': 2.5,	'distance_to_marker': 500},
-	4:	{'name':	'cross_right',  		'exec_time': 2.5,	'distance_to_marker': 600},
+	4:	{'name':	'cross_right',  		'exec_time': 2.5,	'distance_to_marker': 460},
 
 	5:	{'name':	'speed_down',   		'exec_time': 3,		'distance_to_marker': 1500},
 	6:	{'name':	'speed_up',     		'exec_time': 3,		'distance_to_marker': 1500},
