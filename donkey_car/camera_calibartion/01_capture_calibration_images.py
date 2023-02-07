@@ -38,10 +38,7 @@ if __name__ == '__main__':
 	criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 	#cap = cv2.VideoCapture('/dev/cams/usb')
-	cap = Jetson_CSI_Camera(sensor_id=0,
-							image_w=640, image_h=480,
-							capture_width=640, capture_height=480,
-							framerate=20, gstreamer_flip=2)
+	cap = Jetson_CSI_Camera(sensor_id=0, image_w=640, image_h=480, capture_width=640, capture_height=480, framerate=20, gstreamer_flip=2)
 	while True:
 		# _, frame = cap.read()
 		_, frame = cap.read_frame_from_device()

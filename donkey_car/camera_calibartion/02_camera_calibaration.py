@@ -22,7 +22,7 @@ if __name__ == '__main__':
 	CHESS_BOARD_DIM = (9, 6)
 
 	# The size of Square in the checker board.
-	SQUARE_SIZE = 14  # millimeters
+	SQUARE_SIZE = 19  # millimeters
 
 	# termination criteria
 	criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)

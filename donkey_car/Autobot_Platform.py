@@ -266,6 +266,7 @@ def dual_cam_drive(cfg,
 	aruco_sign_detector = ArucoSignDetector(signs_dict=cfg.ARUCO_SIGNS_DICT,
 											calib_data_path=cfg.ARUCO_CAMERA_CALIB_DATA_PATH,
 											marker_size_mm=cfg.ARUCO_SIGN_SIZE_MM)
+											# marker_size_mm=38/2)
 	if cfg.ARUCO_SIGNS_SAVE_TO_DIR:
 		aruco_sign_detector.save_signs_to_dir()
 
@@ -281,8 +282,14 @@ def dual_cam_drive(cfg,
 	# 	  threaded=True)
 
 	# ARUCO SIGNS TOP DETECTION
+	# V.add(aruco_sign_detector,
+	# 	  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.ROAD_CAM}/pure_image'],
+	# 	  outputs=[f'cam_top/image_array', 'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+	# 	  threaded=False)
+
+
 	V.add(aruco_sign_detector,
-		  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.ROAD_CAM}/pure_image'],
+		  inputs=[f'cam_top/pure_image', f'cam_bot/pure_image'],
 		  outputs=[f'cam_top/image_array', 'cam_bot/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
 		  threaded=False)
 
