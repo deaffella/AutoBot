@@ -130,15 +130,24 @@ class ArucoSignDetector():
             markerImage = self.get_sign_image_by_id(id=sign_aruco_idx)
             cv2.imwrite(img_path, markerImage)
 
-    def run(self, road_frame: np.ndarray, sign_frame: np.ndarray) -> (np.ndarray, np.ndarray, np.ndarray):
-        if type(road_frame) == np.ndarray and type(sign_frame) == np.ndarray:
+    # def run(self, road_frame: np.ndarray, sign_frame: np.ndarray) -> (np.ndarray, np.ndarray, np.ndarray):
+    #     if type(road_frame) == np.ndarray and type(sign_frame) == np.ndarray:
+    #         marker_corners, markerIds = self.detect(frame=sign_frame)
+    #         sign_names, bboxes, distances = self.estimate_pose(marker_corners=marker_corners, markerIds=markerIds)
+    #         sign_frame = self.draw(frame=sign_frame, sign_names=sign_names, bboxes=marker_corners, distances=distances)
+    #         return road_frame, sign_frame, marker_corners, markerIds, distances
+    #     else:
+    #         print('!!!!!')
+    #         print(type(road_frame), type(sign_frame))
+
+    def run(self, sign_frame: np.ndarray) -> (np.ndarray, np.ndarray, np.ndarray):
+        if type(sign_frame) == np.ndarray:
             marker_corners, markerIds = self.detect(frame=sign_frame)
             sign_names, bboxes, distances = self.estimate_pose(marker_corners=marker_corners, markerIds=markerIds)
-            sign_frame = self.draw(frame=sign_frame, sign_names=sign_names, bboxes=marker_corners, distances=distances)
-            return road_frame, sign_frame, marker_corners, markerIds, distances
-        else:
-            print('!!!!!')
-            print(type(road_frame), type(sign_frame))
+
+            marked_sign_frame = np.copy(sign_frame)
+            marked_sign_frame = self.draw(frame=marked_sign_frame, sign_names=sign_names, bboxes=marker_corners, distances=distances)
+            return sign_frame, marked_sign_frame, marker_corners, markerIds, distances
 
     def shutdown(self):
         pass

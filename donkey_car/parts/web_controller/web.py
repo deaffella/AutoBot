@@ -134,6 +134,7 @@ class LocalWebController(tornado.web.Application):
             (r"/wsCalibrate", WebSocketCalibrateAPI),
             (r"/video_top", VideoAPI_Top),
             (r"/video_bot", VideoAPI_Bot),
+            (r"/video_aruco", VideoAPI_Detected_Aruco),
             (r"/wsTest", WsTest),
 
             (r"/static/(.*)", StaticFileHandler,
@@ -163,7 +164,7 @@ class LocalWebController(tornado.web.Application):
                     logger.warn("Error writing websocket message", exc_info=e)
                     pass
 
-    def run_threaded(self, img_arr_top=None, img_arr_bot=None, num_records=0, mode=None, recording=None):
+    def run_threaded(self, img_arr_top=None, img_arr_bot=None, img_arr_aruco=None, num_records=0, mode=None, recording=None):
         """
         :param img_arr: current camera top image or None
         :param img_arr: current camera bot image or None
@@ -174,6 +175,7 @@ class LocalWebController(tornado.web.Application):
         # self.img_arr = img_arr
         self.img_arr_top = img_arr_top
         self.img_arr_bot = img_arr_bot
+        self.img_arr_aruco = img_arr_aruco
         self.num_records = num_records
 
         #
@@ -217,8 +219,8 @@ class LocalWebController(tornado.web.Application):
 
         return self.angle, self.throttle, self.mode, self.recording, buttons
 
-    def run(self, img_arr_top=None, img_arr_bot=None, num_records=0, mode=None, recording=None):
-        return self.run_threaded(img_arr_top, img_arr_bot, num_records, mode, recording)
+    def run(self, img_arr_top=None, img_arr_bot=None, img_arr_aruco=None, num_records=0, mode=None, recording=None):
+        return self.run_threaded(img_arr_top, img_arr_bot, img_arr_aruco, num_records, mode, recording)
 
     def shutdown(self):
         pass
@@ -412,6 +414,38 @@ class VideoAPI_Bot(RequestHandler):
                 await tornado.gen.sleep(interval)
 
 
+class VideoAPI_Detected_Aruco(RequestHandler):
+    '''
+    Serves a MJPEG of the images posted from the vehicle.
+    '''
+
+    async def get(self):
+
+        self.set_header("Content-type",
+                        "multipart/x-mixed-replace;boundary=--boundarydonotcross")
+
+        served_image_timestamp = time.time()
+        my_boundary = "--boundarydonotcross\n"
+        while True:
+
+            interval = .01
+            if served_image_timestamp + interval < time.time() and \
+                    hasattr(self.application, 'img_arr_aruco'):
+
+                img = utils.arr_to_binary(self.application.img_arr_aruco)
+                self.write(my_boundary)
+                self.write("Content-type: image/jpeg\r\n")
+                self.write("Content-length: %s\r\n\r\n" % len(img))
+                self.write(img)
+                served_image_timestamp = time.time()
+                try:
+                    await self.flush()
+                except tornado.iostream.StreamClosedError:
+                    pass
+            else:
+                await tornado.gen.sleep(interval)
+
+
 class BaseHandler(RequestHandler):
     """ Serves the FPV web page"""
     async def get(self):
@@ -438,6 +472,8 @@ class WebFpv(Application):
             (r"/", BaseHandler),
             (r"/video_top", VideoAPI_Top),
             (r"/video_bot", VideoAPI_Bot),
+            (r"/video_aruco", VideoAPI_Detected_Aruco),
+
             (r"/static/(.*)", StaticFileHandler,
              {"path": self.static_file_path})
         ]

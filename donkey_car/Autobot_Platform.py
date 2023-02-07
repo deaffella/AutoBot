@@ -47,7 +47,7 @@ def remove_collected_data(dir_path: str):
 def add_controller(V, cfg):
 	ctr = LocalWebController(port=cfg.WEB_CONTROL_PORT, mode=cfg.WEB_INIT_MODE)
 	V.add(ctr,
-		  inputs=[f'cam_top/image_array', f'cam_bot/image_array', 'tub/num_records', 'user/mode', 'recording'],
+		  inputs=[f'cam_top/image_array', f'cam_bot/image_array', f'cam_top/detected_aruco', 'tub/num_records', 'user/mode', 'recording'],
 		  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording', 'web/buttons'],
 		  threaded=True)
 
@@ -78,7 +78,8 @@ def add_controller(V, cfg):
 				V.add(netwkJs, threaded=True)
 				ctr.js = netwkJs
 		V.add(ctr,
-			  inputs=[f'{cfg.ROAD_CAM}/image_array', 'user/mode', 'recording'],
+			  # inputs=[f'{cfg.ROAD_CAM}/pure_image', 'user/mode', 'recording'],
+			  inputs=[f'{cfg.ROAD_CAM}/pure_image', 'user/mode', 'recording'],
 			  outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
 			  threaded=True)
 	return ctr
@@ -251,7 +252,8 @@ def dual_cam_drive(cfg,
 
 	# setup bottom camera
 	cam_bot = CV_USB_Camera(camera_path='/dev/cams/usb', capture_width=cfg.IMAGE_W, capture_height=cfg.IMAGE_H)
-	V.add(cam_bot, inputs=[], outputs=[f'cam_bot/pure_image'], threaded=True)
+	# V.add(cam_bot, inputs=[], outputs=[f'cam_bot/pure_image'], threaded=True)
+	V.add(cam_bot, inputs=[], outputs=[f'cam_bot/image_array'], threaded=True)
 
 	time.sleep(0.4)
 
@@ -286,8 +288,13 @@ def dual_cam_drive(cfg,
 
 
 	V.add(aruco_sign_detector,
-		  inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
-		  outputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+		  # inputs=[f'{cfg.ROAD_CAM}/pure_image', f'{cfg.SIGNS_CAM}/pure_image'],
+		  # outputs=[f'{cfg.ROAD_CAM}/image_array', f'{cfg.SIGNS_CAM}/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+
+		  # inputs=[f'cam_top/pure_image', f'cam_bot/pure_image'],
+		  inputs=[f'cam_top/pure_image'],
+		  # outputs=[f'cam_top/image_array', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
+		  outputs=[f'cam_top/image_array', f'cam_top/detected_aruco', 'aruco/markerCorners', 'aruco/markerIds', 'aruco/distances'],
 		  threaded=False)
 
 	V.add(ArucoDriveController(signs_dict=cfg.ARUCO_SIGNS_DICT),
@@ -463,23 +470,23 @@ def dual_cam_drive(cfg,
 				ctr.set_button_down_trigger('L1', bh.increment_state)
 			except:
 				pass
-			inputs = [f'{cfg.ROAD_CAM}/image_array', "behavior/one_hot_state_array"]
+			inputs = [f'{cfg.ROAD_CAM}/pure_image', "behavior/one_hot_state_array"]
 		else:
-			inputs = [f'{cfg.ROAD_CAM}/image_array']
+			inputs = [f'{cfg.ROAD_CAM}/pure_image']
 
 		# collect model inference outputs
 		outputs = ['pilot/angle', 'pilot/throttle']
 
 
-		# Add image transformations like crop or trapezoidal mask
-		if hasattr(cfg, 'TRANSFORMATIONS') and cfg.TRANSFORMATIONS:
-			from donkeycar.pipeline.augmentations import ImageAugmentation
-			# V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'), inputs=['cam/image_array'], outputs=['cam/image_array_trans'])
-			# inputs = ['cam/image_array_trans'] + inputs[1:]
-			V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'),
-				  inputs=[f'{cfg.ROAD_CAM}/image_array'],
-				  outputs=[f'{cfg.ROAD_CAM}/image_array_trans'])
-			inputs = [f'{cfg.ROAD_CAM}/image_array_trans'] + inputs[1:]
+		# # Add image transformations like crop or trapezoidal mask
+		# if hasattr(cfg, 'TRANSFORMATIONS') and cfg.TRANSFORMATIONS:
+		# 	from donkeycar.pipeline.augmentations import ImageAugmentation
+		# 	# V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'), inputs=['cam/image_array'], outputs=['cam/image_array_trans'])
+		# 	# inputs = ['cam/image_array_trans'] + inputs[1:]
+		# 	V.add(ImageAugmentation(cfg, 'TRANSFORMATIONS'),
+		# 		  inputs=[f'{cfg.ROAD_CAM}/pure_image'],
+		# 		  outputs=[f'{cfg.ROAD_CAM}/pure_image_trans'])
+		# 	inputs = [f'{cfg.ROAD_CAM}/pure_image_trans'] + inputs[1:]
 		V.add(kl, inputs=inputs, outputs=outputs, run_condition='run_pilot')
 
 	# NOTE: when launch throttle is in effect, pilot speed is set to None
@@ -551,8 +558,8 @@ def dual_cam_drive(cfg,
 	cam_top_tub_writer = TubWriter(f'{current_tub_path}',
 								   inputs=inputs + ['cam/image_array', ],
 								   types=types + ['image_array', ], metadata=meta)
-	V.add(cam_top_tub_writer, inputs=inputs + [f'{cfg.ROAD_CAM}/image_array'], outputs=["tub/num_records"],
-		  run_condition='recording')
+	# V.add(cam_top_tub_writer, inputs=inputs + [f'{cfg.ROAD_CAM}/pure_image'], outputs=["tub/num_records"], run_condition='recording')
+	V.add(cam_top_tub_writer, inputs=inputs + [f'{cfg.ROAD_CAM}/pure_image'], outputs=["tub/num_records"], run_condition='recording')
 
 	print(f"{'-' * 20}\n{'-' * 20}\n{'-' * 20}\n")
 	print(f"You can now go to:\n\n<your hostname.local>:{cfg.WEB_CONTROL_PORT}\nto drive your car.\n")
